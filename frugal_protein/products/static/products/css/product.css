@@ -140,6 +140,11 @@ body {
         overflow: hidden;
     }
 
+    /* PRICES TABLE */
+    .prices > .table-row {
+        display: block;
+    }
+
     /* WHITESPACE & SPACING */
     .nutrition .col1 {padding-left: 15%}
     .nutrition .col2 {padding-right: 15%}
