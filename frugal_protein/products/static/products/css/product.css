@@ -26,6 +26,15 @@
         'p p p'
 }
 
+/* IMAGE */
+.image-wrapper {
+    height: 200px;
+    width: 200px;
+    
+    background: white;
+    padding: 0.3rem;
+    border-radius: 0.5rem;
+}
 
 /* SMALL */
 @media all and (max-width: 425px) {
