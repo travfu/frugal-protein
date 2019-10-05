@@ -1,4 +1,27 @@
 /* BASE */
 :root {
-    background: rgb(236, 236, 236)
+    background: rgb(236, 236, 236);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 300;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+/* GRID LAYOUT */
+.image-wrapper     {grid-area: i}
+.title-wrapper     {grid-area: t}
+.nutrition-wrapper {grid-area: n}
+.prices-wrapper    {grid-area: p}
+
+.container {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    grid-template-rows: repeat(3, auto);
+    grid-gap: 1rem;
+    grid-template-areas:
+        'i i t'
+        'i i n'
+        'p p p'
 }
