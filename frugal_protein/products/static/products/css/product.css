@@ -64,6 +64,16 @@
 .flex--2col > * {flex: 1 0 50%}
 .flex--4col > * {flex: 1 0 25%}
 
+/* FLEXBOX TABLE - Colours */
+.table-thead {
+    background: #97a1a7;
+    color: #374047;
+    font-weight: 600;
+}
+
+.table-row:nth-child(odd) {background: #f5f5f5}
+.table-row:nth-child(even) {background: white}
+
 /* NUTRITION TABLE */
 .nutrition > .table-thead {
     text-align: center;
