@@ -91,6 +91,7 @@
 }
 
 .price-composite > .price-offer {
+    /* Force-wrap offer value to next line */
     flex-basis: 100%;
 }
 
