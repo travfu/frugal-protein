@@ -123,4 +123,8 @@ body {
         border-radius: 1rem;
         overflow: hidden;
     }
+
+    /* WHITESPACE & SPACING */
+    .nutrition .col1 {padding-left: 15%}
+    .nutrition .col2 {padding-right: 15%}
 }
