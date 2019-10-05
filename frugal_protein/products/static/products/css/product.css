@@ -87,6 +87,11 @@
 /* PRICES TABLE */
 .price-composite {
     display: flex;
+    flex-wrap: wrap;
+}
+
+.price-composite > .price-offer {
+    flex-basis: 100%;
 }
 
 /* WHITESPACE & SPACING */
