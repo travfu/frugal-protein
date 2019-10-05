@@ -41,6 +41,14 @@
     width: 100%;
 }
 
+/* TITLE */
+.title {
+    text-align: left;
+    font-size: 1.5rem;
+    font-family: 'Rubik', sans-serif;
+}
+
+
 /* SMALL */
 @media all and (max-width: 425px) {
     /* GRID LAYOUT */
