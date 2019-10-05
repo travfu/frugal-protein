@@ -23,7 +23,8 @@
     grid-template-areas:
         'i i t'
         'i i n'
-        'p p p'
+        'p p p';
+    align-items: center; 
 }
 
 /* IMAGE */
