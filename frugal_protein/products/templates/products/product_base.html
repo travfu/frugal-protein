@@ -1,0 +1,10 @@
+{% extends "products/html_base.html" %}
+
+{% block content %}
+    <div class="container">
+        <div class="image-wrapper">{% block img %}{% endblock img %}</div>
+        <div class="title-wrapper">{% block description %}{% endblock description %}</div>
+        <div class="nutrition-wrapper">{% block nutrition %}{% endblock nutrition %}</div>
+        <div class="prices-wrapper">{% block prices %}{% endblock prices %}</div>
+    </div>
+{% endblock content %}
