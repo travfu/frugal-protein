@@ -95,6 +95,10 @@
     flex-basis: 100%;
 }
 
+.price-composite > .price-sale {
+    padding-left: 0.3rem;
+}
+
 /* WHITESPACE & SPACING */
 body {
     padding: 0;
