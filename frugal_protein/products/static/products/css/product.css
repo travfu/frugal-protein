@@ -84,6 +84,11 @@
     text-align: right;
 }
 
+/* PRICES TABLE */
+.price-composite {
+    display: flex;
+}
+
 /* WHITESPACE & SPACING */
 body {
     padding: 0;
