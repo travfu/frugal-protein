@@ -48,6 +48,22 @@
     font-family: 'Rubik', sans-serif;
 }
 
+/* FLEXBOX TABLE */
+.table {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.table-thead,
+.table-row {
+    display: flex;
+    padding: 0.5rem;
+}
+
+.flex--1col > * {flex: 1 0 100%}
+.flex--2col > * {flex: 1 0 50%}
+.flex--4col > * {flex: 1 0 25%}
+
 
 /* SMALL */
 @media all and (max-width: 425px) {

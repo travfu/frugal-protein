@@ -15,19 +15,31 @@
 
 {% block nutrition %}
     {{ block.super }}
-    <div>{{ product.header }}</div>
+    <div class="nutrition table flex--1col">
+        <div class="table-thead flex--1col">
+            <div>{{ product.header }}</div>
+        </div>
 
-    <div>Energy</div>
-    <div>{{ product.kcal|floatformat:0 }}kcal</div>
+        <div class="table-row flex--2col">
+            <div>Energy</div>
+            <div>{{ product.kcal|floatformat:0 }}kcal</div>
+        </div>
 
-    <div>Protein</div>
-    <div>{{ product.protein|floatformat:1 }}g</div>
+        <div class="table-row flex--2col">
+            <div>Protein</div>
+            <div>{{ product.protein|floatformat:1 }}g</div>
+        </div>
 
-    <div>Carb</div>
-    <div>{{ product.carb|floatformat:1 }}g</div>
+        <div class="table-row flex--2col">
+            <div>Carb</div>
+            <div>{{ product.carb|floatformat:1 }}g</div>
+        </div>
 
-    <div>Fat</div>
-    <div>{{ product.fat|floatformat:1 }}g</div>
+        <div class="table-row flex--2col">
+            <div>Fat</div>
+            <div>{{ product.fat|floatformat:1 }}g</div>
+        </div>
+    </div>
 {% endblock nutrition %}
 
 
