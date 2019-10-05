@@ -7,3 +7,4 @@ from . import models as m
 class ProductView(DetailView):
     context_object_name = 'product'
     model = m.ProductInfo
+    template_name = 'products/product.html'
