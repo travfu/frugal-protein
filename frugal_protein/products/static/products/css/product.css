@@ -145,7 +145,41 @@ body {
         display: block;
     }
 
+    /* PRICES TABLE - Headers */
+    .prices > .table-thead {
+        display: none;
+    }
+
+    .prices .col2::before {
+        content: "price"
+    }
+
+    .prices .col4::before {
+        content: "£/10g \Aprotein"
+    }
+
+    .prices .col3::before {
+        content: '£/unit'
+    }
+
+    .prices > .table-row > :before {
+        color: #999;
+    }
+
     /* WHITESPACE & SPACING */
     .nutrition .col1 {padding-left: 15%}
     .nutrition .col2 {padding-right: 15%}
+
+    .prices > .table-row > .price-composite {
+        padding-left: 50%;
+        padding-right: 15%;
+        justify-content: flex-end;
+        position: relative;
+    }
+
+    .prices > .table-row > :before {
+        position: absolute;
+        left: 15%;
+        white-space: pre;
+    }
 }
