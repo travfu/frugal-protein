@@ -25,3 +25,17 @@
         'i i n'
         'p p p'
 }
+
+
+/* SMALL */
+@media all and (max-width: 425px) {
+    /* GRID LAYOUT */
+    .container {
+        grid-template-columns: auto 1fr;
+        grid-column-gap: 0.5rem;
+        grid-template-areas:
+            'i t'
+            'n n'
+            'p p';
+    }
+}
