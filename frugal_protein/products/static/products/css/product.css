@@ -83,6 +83,22 @@
     text-align: right;
 }
 
+/* WHITESPACE & SPACING */
+body {
+    padding: 0;
+    margin: 0;
+}
+
+.container {
+    min-width: 250px;
+    max-width: 800px;
+    padding: 2rem;
+    margin: auto;
+}
+
+.nutrition .col1 {padding-left: 10%}
+.nutrition .col2 {padding-right: 10%}
+
 /* SMALL */
 @media all and (max-width: 425px) {
     /* GRID LAYOUT */
