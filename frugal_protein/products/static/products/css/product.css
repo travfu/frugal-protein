@@ -117,4 +117,10 @@ body {
         width: 50px;
         border-radius: 0.2rem;
     }
+
+    /* FLEXBOX TABLE */
+    .table {
+        border-radius: 1rem;
+        overflow: hidden;
+    }
 }
