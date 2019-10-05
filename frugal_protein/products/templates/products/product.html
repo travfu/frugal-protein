@@ -15,7 +15,19 @@
 
 {% block nutrition %}
     {{ block.super }}
+    <div>{{ product.header }}</div>
 
+    <div>Energy</div>
+    <div>{{ product.kcal }}</div>
+
+    <div>Protein</div>
+    <div>{{ product.protein }}</div>
+
+    <div>Carb</div>
+    <div>{{ product.carb }}</div>
+
+    <div>Fat</div>
+    <div>{{ product.fat }}</div>
 {% endblock nutrition %}
 
 
