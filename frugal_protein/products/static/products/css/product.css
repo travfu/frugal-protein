@@ -64,6 +64,14 @@
 .flex--2col > * {flex: 1 0 50%}
 .flex--4col > * {flex: 1 0 25%}
 
+/* NUTRITION TABLE */
+.nutrition > .table-thead {
+    text-align: center;
+}
+
+.nutrition .col2 {
+    text-align: right;
+}
 
 /* SMALL */
 @media all and (max-width: 425px) {
