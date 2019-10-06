@@ -73,4 +73,10 @@
         </div>
 
     </div>
+
+    {% if product.price_table %}
+        <div>Price available!</div>
+    {% else%}
+        <div>Price data unavailable</div>
+    {% endif %}
 {% endblock prices %}
