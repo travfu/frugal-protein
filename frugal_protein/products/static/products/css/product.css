@@ -88,24 +88,22 @@
 .price-composite {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
 }
 
-.price-composite > .price-offer {
+.price-offer {
     /* Force-wrap offer value to next line */
     flex-basis: 100%;
+    font-style: italic;
 }
 
-.price-composite > .price-sale {
+.price-sale {
     padding-left: 0.3rem;
 }
 
 .price-base,
 .price-sale {
     font-weight: 600;
-}
-
-.price-offer {
-    font-style: italic;
 }
 
 .price-base.strikeout {
@@ -162,7 +160,6 @@ body {
 
     .price-composite > * {
         text-align: right;
-        align-self: center;
     }
 
     .store {
