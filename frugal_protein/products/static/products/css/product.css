@@ -99,6 +99,17 @@
     padding-left: 0.3rem;
 }
 
+.price-base,
+.price-sale {
+    font-weight: 600;
+}
+
+.price-base.strikeout {
+    text-decoration: line-through;
+    color: gray;
+    font-size: 0.8rem;
+}
+
 /* WHITESPACE & SPACING */
 body {
     padding: 0;
@@ -143,6 +154,21 @@ body {
     /* PRICES TABLE */
     .prices > .table-row {
         display: block;
+    }
+
+    .price-composite > * {
+        text-align: right;
+        align-self: center;
+    }
+
+    .store {
+        text-align: center;
+        font-family: 'Rubik', sans-serif;
+        font-size: 1.5rem;
+    }
+
+    .price-offer {
+        font-style: italic;
     }
 
     /* PRICES TABLE - Headers */
