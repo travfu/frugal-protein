@@ -191,6 +191,10 @@ body {
         color: #999;
     }
 
+    .price-composite:not(.store):not(:nth-of-type(2)) {
+        border-top: 1px solid lightslategray;
+    }
+
     /* WHITESPACE & SPACING */
     .nutrition .col1 {padding-left: 15%}
     .nutrition .col2 {padding-right: 15%}
