@@ -128,6 +128,8 @@ body {
 .nutrition .col1 {padding-left: 10%}
 .nutrition .col2 {padding-right: 10%}
 
+.price-composite {padding: 0.5rem}
+
 /* SMALL */
 @media all and (max-width: 425px) {
     /* GRID LAYOUT */
