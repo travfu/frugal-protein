@@ -196,12 +196,14 @@ body {
     }
 
     /* WHITESPACE & SPACING */
+    .container {padding: 2rem 5% 2rem 5%}
     .nutrition .col1 {padding-left: 15%}
     .nutrition .col2 {padding-right: 15%}
 
     .prices > .table-row > .price-composite {
         padding-left: 50%;
         padding-right: 15%;
+        min-height: 2.5rem;
         justify-content: flex-end;
         position: relative;
     }
@@ -211,4 +213,6 @@ body {
         left: 15%;
         white-space: pre;
     }
+
+    .prices .store {padding: 0.5rem}
 }
