@@ -104,6 +104,10 @@
     font-weight: 600;
 }
 
+.price-offer {
+    font-style: italic;
+}
+
 .price-base.strikeout {
     text-decoration: line-through;
     color: gray;
@@ -165,10 +169,6 @@ body {
         text-align: center;
         font-family: 'Rubik', sans-serif;
         font-size: 1.5rem;
-    }
-
-    .price-offer {
-        font-style: italic;
     }
 
     /* PRICES TABLE - Headers */
