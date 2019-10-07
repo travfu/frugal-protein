@@ -85,6 +85,10 @@
 }
 
 /* PRICES TABLE */
+.prices > * {
+    align-items: center
+}
+
 .price-composite {
     display: flex;
     flex-wrap: wrap;
