@@ -15,3 +15,16 @@ def formatprice(value):
         else:            
             return '£' + f'{value:.2f}'
     return ''
+
+@register.filter
+def formatuom(value):
+    """Translates measurement units to reader-friendly text"""
+    options = {
+        'SNGL': 'item',
+        'l': 'litre'
+    }
+    
+    if any(value == option for option in options):
+        return options[value]
+    else:
+        return value
