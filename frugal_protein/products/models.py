@@ -53,7 +53,7 @@ class ProductInfo(models.Model):
         base_suffix = '_base_price'
         sale_suffix = '_sale_price'
         offer_suffix = '_offer_price'
-        offer_txt_suffix = 'offer_text'
+        offer_txt_suffix = '_offer_text'
 
         # For each store, wrap price data in a dict
         prices = {}
@@ -65,16 +65,16 @@ class ProductInfo(models.Model):
             }
             if price_values['base'] is None:
                 continue
-            
-            price_col = price_values
-            price_col['offer']: getattr(self, store + offer_txt_suffix)
+
+            price_col = {**price_values}
+            price_col['offer'] = getattr(self, store + offer_txt_suffix)
             per_unit_col = {k: calc_price_per_qty(v, self.total_qty) for k, v in price_values.items()}
             per_protein_col = {k: calc_price_per_protein(v, self.protein, self.unit_of_measurement) for k, v in price_values.items()}
 
-            prices[store] = {
-                'price-col': price_col,
-                'price-unit-col': per_unit_col,
-                'price-protein-col': per_protein_col
-            }
+            price_col['class'] = 'col1'
+            per_unit_col['class'] = 'col2'
+            per_protein_col['class'] = 'col3'
 
+            prices[store] = [price_col, per_unit_col, per_protein_col]
+            
         return prices
