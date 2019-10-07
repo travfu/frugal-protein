@@ -183,10 +183,6 @@ body {
         content: "£/10g \Aprotein"
     }
 
-    .prices .col3::before {
-        content: '£/unit'
-    }
-
     .prices > .table-row > :before {
         color: #999;
     }

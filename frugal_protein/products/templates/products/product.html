@@ -80,3 +80,14 @@
         <div>Price data unavailable</div>
     {% endif %}
 {% endblock prices %}
+
+
+<!--This is in the html file because Django's templating is required for pseudo element content-->
+{% block header %}
+    {{ block.super }}
+    <style>
+        @media all and (max-width: 425px) {
+            .prices .col3::before {content: "£/{{ product.unit_of_measurement|formatuom }}"}
+        }
+    </style>
+{% endblock header %}
