@@ -71,10 +71,10 @@ class ProductInfo(models.Model):
             per_unit_col = {k: calc_price_per_qty(v, self.total_qty) for k, v in price_values.items()}
             per_protein_col = {k: calc_price_per_protein(v, self.protein, self.unit_of_measurement) for k, v in price_values.items()}
 
-            price_col['class'] = 'col1'
-            per_unit_col['class'] = 'col2'
-            per_protein_col['class'] = 'col3'
+            price_col['class'] = 'col2'
+            per_unit_col['class'] = 'col3'
+            per_protein_col['class'] = 'col4'
 
             prices[store] = [price_col, per_unit_col, per_protein_col]
-            
+
         return prices
