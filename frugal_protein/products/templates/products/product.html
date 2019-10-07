@@ -57,7 +57,7 @@
             
             {% for store, prices in product.price_table.items %}
             <div class="table-row flex--4col">
-                <div class="col1 price-composite">{{ store|title }}</div>
+                <div class="col1 store">{{ store|title }}</div>
                 
                 {% for price_composite in prices %}
                     <div class="{{ price_composite.class }} price-composite">
