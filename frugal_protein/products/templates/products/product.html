@@ -1,5 +1,6 @@
 {% extends "products/product_base.html" %}
 
+{% load products_filters %}
 
 {% block img %}
     {{ block.super }}
@@ -61,14 +62,14 @@
                 {% for price_composite in prices %}
                     <div class="{{ price_composite.class }} price-composite">
                         {% if price_composite.sale %}
-                            <div class="price-base strikeout">{{ price_composite.base }}</div>
-                            <div class="price-sale">{{ price_composite.sale }}</div>
+                            <div class="price-base strikeout">{{ price_composite.base|formatprice }}</div>
+                            <div class="price-sale">{{ price_composite.sale|formatprice }}</div>
                         {% else %}
-                            <div class="price-base">{{ price_composite.base }}</div>
+                            <div class="price-base">{{ price_composite.base|formatprice }}</div>
                         {% endif %}
                         
                         {% if price_composite.offer %}                            
-                            <div class="price-offer">{{ price_composite.offer }}</div>
+                            <div class="price-offer">{{ price_composite.offer|formatprice }}</div>
                         {% endif %}
                     </div>
                 {% endfor %}
