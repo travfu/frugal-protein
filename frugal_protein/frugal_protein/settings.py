@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 import os
 import django_heroku
-from ._local_psql_credentials import postgres_username, postgres_password
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -76,16 +75,7 @@ WSGI_APPLICATION = 'frugal_protein.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'frugal_protein_local',
-        'USER': postgres_username,
-        'PASSWORD': postgres_password,
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
+DATABASES = {}
 
 
 # Password validation
