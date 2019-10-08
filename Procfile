@@ -1,0 +1,1 @@
+web: gunicorn --chdir frugal_protein frugal_protein.wsgi

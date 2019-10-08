@@ -1,2 +1,5 @@
 django
 psycopg2
+
+# For deploying on Heroku
+gunicorn
