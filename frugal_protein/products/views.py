@@ -1,7 +1,9 @@
 from django.shortcuts import render
 from django.views.generic import DetailView, ListView
+from django.views.generic.edit import FormMixin
 
 from . import models as m
+from . import forms
 
 # Create your views here.
 class ProductView(DetailView):
@@ -9,8 +11,23 @@ class ProductView(DetailView):
     model = m.ProductInfo
     template_name = 'products/product.html'
 
-class SearchView(ListView):
-    queryset = m.ProductInfo.objects.filter(description__icontains = 'quorn')
+class SearchView(FormMixin, ListView):
+    # FormMixin Attributes
+    form_class = forms.ProductSearchForm
+    
+    # ListView Attributes
     context_object_name = 'products'
     template_name = 'products/product_search.html'
     
+    # FormMixin Methods
+    def get_initial(self):
+        self.initial = {'search': self.request.GET.get('search')}
+        return super().get_initial()
+
+    # ListView Methods
+    def get_queryset(self):
+        search_query = self.request.GET.get('search')
+        queryset = None
+        if search_query is not None:
+            queryset = m.ProductInfo.objects.filter(description__icontains=search_query).order_by('description') 
+        return queryset

@@ -1,7 +1,16 @@
 {% extends "products/html_base.html" %}
 
 {% block content %}
-    {% for product in products %}
-        <div>{{ product.description }}</div>
-    {% endfor %}
+    <form action="">
+        {% csrf_token %}
+        {{ form.search }}
+    </form>
+    
+    {% if products %}
+        {% for product in products %}
+            <div>{{ product.description }}</div>
+        {% endfor %}
+    {% else %}
+        <div>No products found!</div>
+    {% endif %}   
 {% endblock content %}
