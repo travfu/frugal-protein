@@ -4,6 +4,8 @@
     <form action="">
         {% csrf_token %}
         {{ form.search }}
+        {{ form.brand }}
+        {{ form.store }}
     </form>
     
     {% if products %}
