@@ -26,8 +26,18 @@ class SearchView(FormMixin, ListView):
 
     # ListView Methods
     def get_queryset(self):
+        """ Query model based on search query then filter by brand and store """
         search_query = self.request.GET.get('search')
+        brand_query = self.request.GET.get('brand')
+        store_query = self.request.GET.get('store')
+
         queryset = None
-        if search_query is not None:
-            queryset = m.ProductInfo.objects.filter(description__icontains=search_query).order_by('description') 
+        if search_query: 
+            queryset = m.ProductInfo.objects.filter(description__icontains=search_query).order_by('description')
+        
+            if brand_query:
+                queryset = queryset.filter(brand_id=brand_query)
+            if store_query and store_query != 'all':
+                kwarg = {store_query + '__isnull': False}
+                queryset = queryset.filter(**kwarg)
         return queryset
