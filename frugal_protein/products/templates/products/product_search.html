@@ -1,5 +1,11 @@
 {% extends "products/html_base.html" %}
+{% load static %}
 
+
+{% block header %}
+    <link rel="stylesheet" href="{% static "products/css/product_search.css" %}">
+{% endblock header %}
+    
 {% block content %}
     <form action="">
         {% csrf_token %}
@@ -9,9 +15,16 @@
     </form>
     
     {% if products %}
-        {% for product in products %}
-            <div>{{ product.description }}</div>
-        {% endfor %}
+        <ul class="results-wrapper">
+            {% for product in products %}            
+                <li>
+                    <a href=/product/{{ product.pid }} class="result">
+                        <img src="https://dummyimage.com/200x200/c2c2c2/757575&text=No+image" alt="{{ product.description|title }}">
+                        <span>{{ product.description|title }}</span>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
     {% else %}
         <div>No products found!</div>
     {% endif %}   
