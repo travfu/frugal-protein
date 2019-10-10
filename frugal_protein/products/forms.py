@@ -42,7 +42,16 @@ class ProductSearchForm(forms.Form):
         """ Returns brands associated with products returned by search query """
         brands = Brands.objects.filter(productinfo__description__icontains=search_query)
         brands = brands.distinct().order_by('brand')
-        return [(brand.brand_id, brand.brand.title()) for brand in brands]
+
+        choice_tuples = [(brand.brand_id, brand.brand.title()) for brand in brands]
+        if choice_tuples:
+            brand_count_str = str(len(choice_tuples))
+            # Assign value '0' for 'all brands'
+            choice_tuples.insert(0, ('0', f'All Brands ({brand_count_str})'))
+        else:
+            choice_tuples = [(None, 'No Brands')]
+            
+        return choice_tuples
 
     def get_store_choices(self):
         """ Returns list of stores """
