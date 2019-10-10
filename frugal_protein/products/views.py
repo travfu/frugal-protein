@@ -41,7 +41,11 @@ class SearchView(FormMixin, ListView):
             queryset = m.ProductInfo.objects.filter(description__icontains=search_query).order_by('description')
         
             if brand_query:
-                queryset = queryset.filter(brand_id=brand_query)
+                if brand_query == '0':
+                    # 0 value is assigned to 'all brands'
+                    pass
+                else:
+                    queryset = queryset.filter(brand_id=brand_query)
             if store_query and store_query != 'all':
                 kwarg = {store_query + '__isnull': False}
                 queryset = queryset.filter(**kwarg)
