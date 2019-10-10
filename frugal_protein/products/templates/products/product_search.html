@@ -28,4 +28,26 @@
     {% else %}
         <div>No products found!</div>
     {% endif %}   
+
+    {% if is_paginated %}
+        <div class="pagination-wrapper">
+            <div class="page-btn btn-prev">
+                {% if page_obj.has_previous %}
+                    <a href="{{ querystring }}&page={{ page_obj.previous_page_number }}"><</a>
+                {% else %}
+                    <a class="disabled"><</a>
+                {% endif %}
+            </div>
+
+            <div class="page-text">Page {{ page_obj.number }} of {{ paginator.num_pages }}</div>
+
+            <div class="page-btn btn-next">
+                {% if page_obj.has_next %}
+                    <a href="{{ querystring }}&page={{ page_obj.next_page_number }}">></a>
+                {% else %}
+                    <a class="disabled">></a>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
 {% endblock content %}
