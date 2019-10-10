@@ -32,7 +32,7 @@ class SearchView(FormMixin, ListView):
         brand_query = self.request.GET.get('brand')
         store_query = self.request.GET.get('store')
 
-        queryset = None
+        queryset = []
         if search_query: 
             queryset = m.ProductInfo.objects.filter(description__icontains=search_query).order_by('description')
         
