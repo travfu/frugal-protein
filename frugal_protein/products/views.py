@@ -22,7 +22,11 @@ class SearchView(FormMixin, ListView):
     
     # FormMixin Methods
     def get_initial(self):
-        self.initial = {'search': self.request.GET.get('search')}
+        self.initial = {
+            'search': self.request.GET.get('search'), 
+            'brand': self.request.GET.get('brand'),
+            'store': self.request.GET.get('store')
+        }
         return super().get_initial()
 
     # ListView Methods
