@@ -2,14 +2,27 @@ from django import forms
 from .models import Brands, ProductInfo
 
 class ProductSearchForm(forms.Form):
-    search = forms.CharField(max_length = 255)
+    search = forms.CharField(
+        max_length = 255,
+        widget = forms.TextInput({
+            'class': 'form_field'
+        })
+    )
     brand = forms.ChoiceField(
         choices = [],
         required = False,
+        widget = forms.Select({
+            'class': 'form_field',
+            'onchange': 'this.form.submit()',
+        })
     )
     store = forms.ChoiceField(
         choices = [],
-        required = False
+        required = False,
+        widget = forms.Select({
+            'class': 'form_field',
+            'onchange': 'this.form.submit()',
+        })
     )
 
     def __init__(self, *args, **kwargs):
