@@ -18,6 +18,7 @@ class SearchView(FormMixin, ListView):
     # ListView Attributes
     context_object_name = 'products'
     template_name = 'products/product_search.html'
+    paginate_by = 24
     
     # FormMixin Methods
     def get_initial(self):
