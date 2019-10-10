@@ -42,3 +42,19 @@ class SearchView(FormMixin, ListView):
                 kwarg = {store_query + '__isnull': False}
                 queryset = queryset.filter(**kwarg)
         return queryset
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['querystring'] = self.get_querystring()
+        return context
+    
+    # Custom Methods
+    def get_querystring(self):
+        """ Returns querystring from GET request as string """
+        query_dict = self.request.GET
+        querystring_lst = []
+        for k, v in query_dict.items():
+            if k != 'page':
+                querystring_lst.append(k + '=' + v)
+        querystring = '?' + '&'.join(querystring_lst)
+        return querystring
