@@ -3,6 +3,10 @@
     color: #444444;
 }
 
+* {
+    box-sizing: border-box;
+}
+
 body {
     max-width: 1500px;
     margin: auto;
@@ -13,8 +17,28 @@ body {
 /* RESULTS */
 .results-wrapper {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));  /* min = image-width + padding x 2 */
     grid-gap: 2rem;
 
     list-style-type: none;
+}
+
+.result {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    border: 1px solid slategray;
+    background: white;
+    padding: 10px;
+    height: 100%;
+}
+
+.result > img {
+    width: 150px;
+    height: 150px;
+}
+
+.result > span {
+    text-align: center;
 }
