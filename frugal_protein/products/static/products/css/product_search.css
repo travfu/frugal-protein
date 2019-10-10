@@ -42,3 +42,45 @@ body {
 .result > span {
     text-align: center;
 }
+
+/* PAGINATION */
+.pagination-wrapper * {
+    text-align: center;
+    line-height: 2rem;
+}
+
+.pagination-wrapper {
+    display: flex;
+    justify-content: center;
+}
+
+.pagination-wrapper > div {
+    flex: 0 0;
+}
+
+.page-text {
+    white-space: nowrap;
+    border: 1px solid slategray;
+    color: #444444;
+    padding: 0 0.5rem 0 0.5rem;
+}
+
+.page-btn > a {
+    display: block;
+    min-width: 30px;
+    border: 1px solid slategray;
+    background: #0074D9;
+
+    color: white;
+    text-decoration: none;
+}
+
+.btn-prev a {
+    border-radius: 0.7rem 0 0 0.7rem;
+    margin-right: -1px;
+}
+
+.btn-next a {
+    border-radius: 0 0.7rem 0.7rem 0;
+    margin-left: -1px;
+}
