@@ -21,6 +21,7 @@ body {
     grid-gap: 2rem;
 
     list-style-type: none;
+    padding-inline-start: 0;
 }
 
 .result {
