@@ -28,3 +28,13 @@ def formatuom(value):
         return options[value]
     else:
         return value
+
+@register.filter
+def format_querystring(query_dict):
+    """ Returns querystring from GET request as string (ignore 'page') """
+    querystring_lst = []
+    for k, v in query_dict.items():
+        if k != 'page':
+            querystring_lst.append(k + '=' + v)
+    querystring = '?' + '&'.join(querystring_lst)
+    return querystring

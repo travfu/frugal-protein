@@ -1,6 +1,6 @@
 {% extends "products/html_base.html" %}
 {% load static %}
-
+{% load products_filters %}
 
 {% block header %}
     <link rel="stylesheet" href="{% static "products/css/product_search.css" %}">
@@ -33,7 +33,7 @@
         <div class="pagination-wrapper">
             <div class="page-btn btn-prev">
                 {% if page_obj.has_previous %}
-                    <a href="{{ querystring }}&page={{ page_obj.previous_page_number }}"><</a>
+                    <a href="{{ querystring|format_querystring }}&page={{ page_obj.previous_page_number }}"><</a>
                 {% else %}
                     <a class="disabled"><</a>
                 {% endif %}
@@ -43,7 +43,7 @@
 
             <div class="page-btn btn-next">
                 {% if page_obj.has_next %}
-                    <a href="{{ querystring }}&page={{ page_obj.next_page_number }}">></a>
+                    <a href="{{ querystring|format_querystring }}&page={{ page_obj.next_page_number }}">></a>
                 {% else %}
                     <a class="disabled">></a>
                 {% endif %}
