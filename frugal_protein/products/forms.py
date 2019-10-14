@@ -1,6 +1,24 @@
 from django import forms
 from .models import Brands, ProductInfo
 
+class myWidget(forms.Select):
+    """
+    forms.Select generates an html string for <select> froms with <options> and applies 
+    user-specified attributes across all <options>. 
+
+    This custom widget add the 'disabled' attribute to <options> with a specific value.
+    doc: https://github.com/django/django/blob/master/django/forms/widgets.py
+    """
+    def get_context(self, *args, **kwargs):
+        context = super().get_context(*args, **kwargs)
+        for _, option, _ in context['widget']['optgroups']:
+            value = option[0].get('value')
+            if value == '':
+                # Add disabled attr to attrs dict (this is possible because of mutability)
+                option[0]['attrs']['disabled'] = ''
+        return context
+
+
 class ProductSearchForm(forms.Form):
     search = forms.CharField(
         max_length = 255,
@@ -11,7 +29,7 @@ class ProductSearchForm(forms.Form):
     brand = forms.ChoiceField(
         choices = [],
         required = False,
-        widget = forms.Select({
+        widget = myWidget({
             'class': 'form_field',
             'onchange': 'this.form.submit()',
         })
@@ -48,6 +66,7 @@ class ProductSearchForm(forms.Form):
             brand_count_str = str(len(choice_tuples))
             # Assign value '0' for 'all brands'
             choice_tuples.insert(0, ('0', f'All Brands ({brand_count_str})'))
+            choice_tuples.insert(0, ('', f"Select a brand"))
         else:
             choice_tuples = [(None, 'No Brands')]
             
