@@ -1,6 +1,7 @@
 :root {
     font-family: 'Nunito Sans', sans-serif;
     color: #444444;
+    --margin: 0.5rem;
 }
 
 * {
@@ -13,6 +14,71 @@ body {
     background: rgb(236, 236, 236)
 }
 
+/* FORM */
+form {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+form select,
+form input {
+    font-family: 'Nunito Sans', sans-serif;
+    color: #444444;
+}
+
+.csrf {
+    display: none
+}
+
+.form-search {
+    display: flex;
+    flex-grow: 1;
+}
+
+.form-search > input {
+    flex-grow: 1;
+}
+
+.search-submit-btn {
+    width: 30px;
+    border-radius: 0 0.5rem 0.5rem 0;
+    border: solid #0074D9;
+    background: #0074D9;
+    flex-shrink: 0;
+    align-self: center;
+    margin-left: -1px;
+}
+
+.form-filter {
+    display: flex;
+}
+
+.form-filter > select {
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+}
+
+.reset-btn {
+    border-radius: 0.5rem;
+    background: #ff3860;
+    color: white;
+}
+
+.form-query {
+    flex-basis: 100%;
+    font-size: 2rem;
+}
+
+/* FORM - Spacing */
+form > * {
+    margin: var(--margin)
+}
+
+.form-search > *,
+.form-filter > * {
+    padding: 0.3rem;
+}
+
 
 /* RESULTS */
 .results-wrapper {
@@ -22,6 +88,8 @@ body {
 
     list-style-type: none;
     padding-inline-start: 0;
+
+    margin: var(--margin)
 }
 
 .result {
