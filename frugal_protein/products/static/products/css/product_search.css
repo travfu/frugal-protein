@@ -160,4 +160,12 @@ form > * {
     .results-wrapper {
         grid-template-columns: 1fr;
     }
+
+    .result {
+        flex-direction: row;
+    }
+
+    .result > img {
+        flex: 0 1 0;
+    }
 }
