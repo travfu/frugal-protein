@@ -153,3 +153,11 @@ form > * {
     border-radius: 0 0.7rem 0.7rem 0;
     margin-left: -1px;
 }
+
+
+/* MEDIA QUERY */
+@media all and (max-width: 700px) {
+    .results-wrapper {
+        grid-template-columns: 1fr;
+    }
+}
