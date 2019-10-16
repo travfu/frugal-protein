@@ -51,8 +51,10 @@ class ProductSearchForm(forms.Form):
 
         # The search query can be found in the 'initial' kwarg when the form is instantiated
         search_query = kwargs['initial'].get('search')
-        if search_query:
+        if search_query is not None:
             self.fields['brand'].choices = self.get_brand_choices(search_query)
+        else: 
+            self.fields['brand'].choices = [('', 'No Brands')]
 
         self.fields['store'].choices = self.get_store_choices()
 
@@ -68,7 +70,7 @@ class ProductSearchForm(forms.Form):
             choice_tuples.insert(0, ('0', f'All Brands ({brand_count_str})'))
             choice_tuples.insert(0, ('', f"Select a brand"))
         else:
-            choice_tuples = [(None, 'No Brands')]
+            choice_tuples = [('', 'No Brands')]
             
         return choice_tuples
 
