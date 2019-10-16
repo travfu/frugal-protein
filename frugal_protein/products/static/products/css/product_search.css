@@ -2,6 +2,7 @@
     font-family: 'Nunito Sans', sans-serif;
     color: #444444;
     --margin: 0.5rem;
+    --default-font: 'Nunito Sans', sans-serif;
 }
 
 * {
@@ -156,7 +157,49 @@ form > * {
 
 
 /* MEDIA QUERY */
-@media all and (max-width: 700px) {
+@media all and (max-width: 450px) {
+    /* FORMS */
+    form,
+    .form-search,
+    .form-filter {
+        flex-wrap: wrap;
+    }
+
+    .form-search > * {
+        margin: 0.2rem 0 0.2rem 0;
+    }
+
+    .search-submit-btn {
+        flex-basis: 100%;
+        border-radius: 0.5rem;
+    }
+
+    .search-submit-btn > svg {
+        display: none;
+    }
+
+    .search-submit-btn::after {
+        content: 'submit';
+        color: white;
+        font-family: var(--default-font);
+    }
+
+    .form-filter > * {
+        flex-basis: 100%;
+        margin: 0.2rem 0 0.2rem 0;
+    }
+
+    .form-filter > select {
+        /* seems redundant but the above can't override this */
+        margin-left: 0;
+        margin-right: 0;
+    }
+    
+    .form-query {
+        font-size: 1.3rem;
+    }
+
+    /* RESULTS */
     .results-wrapper {
         grid-template-columns: 1fr;
         grid-gap: 0.5rem;
