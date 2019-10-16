@@ -4,9 +4,32 @@
 
 {% block header %}
     <link rel="stylesheet" href="{% static "products/css/product.css" %}">
+    <link rel="stylesheet" href="{% static "products/css/navbar.css"%}">
 {% endblock header %}
 
 {% block content %}
+    <div class="navbar-wrapper">
+        <div class="navbar">
+            <div class="navbar-left" id="navbar-dropdown">
+                <div class="dropdown-btn" id="navbar-left-dropdown-btn">≡</div>
+                <a href="/">Home</a>
+                <a href="">Protein Calculator</a>
+            </div>
+            <form action="{% url 'search' %}" method="get" class="navbar-right search">
+                {% csrf_token %}
+                {{ form.search }}
+                <button class="search-submit-btn">
+                    <svg class="search-icon"viewBox="0 0 50 50">
+                        <g fill="none" stroke="#8899AB" stroke-width="5" stroke-linecap="round">
+                            <circle cx="20" cy="22" r="15"/>
+                            <path d="M33 35L45 47"/>
+                        </g>    
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </div>
+    
     <div class="container">
         <div class="image-wrapper">{% block img %}{% endblock img %}</div>
         <div class="title-wrapper">{% block description %}{% endblock description %}</div>

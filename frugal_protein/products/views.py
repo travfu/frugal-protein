@@ -6,10 +6,12 @@ from . import models as m
 from . import forms
 
 # Create your views here.
-class ProductView(DetailView):
+class ProductView(FormMixin, DetailView):
     context_object_name = 'product'
     model = m.ProductInfo
     template_name = 'products/product.html'
+    # Form for navbar
+    form_class = forms.ProductSearchForm
 
 class SearchView(FormMixin, ListView):
     # FormMixin Attributes

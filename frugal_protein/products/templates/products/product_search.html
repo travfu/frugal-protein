@@ -4,9 +4,20 @@
 
 {% block header %}
     <link rel="stylesheet" href="{% static "products/css/product_search.css" %}">
+    <link rel="stylesheet" href="{% static "products/css/navbar.css"%}">
 {% endblock header %}
     
 {% block content %}
+    <div class="navbar-wrapper">
+        <div class="navbar">
+            <div class="navbar-left" id="navbar-dropdown">
+                <div class="dropdown-btn" id="navbar-left-dropdown-btn">≡</div>
+                <a href="/">Home</a>
+                <a href="">Protein Calculator</a>
+            </div>
+        </div>
+    </div>
+    
     <form action="">
         <div class="csrf">{% csrf_token %}</div>
         <div class="form-search">

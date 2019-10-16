@@ -1,0 +1,118 @@
+:root {
+    --navbar-height: 50px;
+    --navbar-bg-color: #37495d;
+    --navbar-text-color: #8899AB;
+    --navbar-text-highlight-color: #CED9E5;
+}
+
+
+/* NAVBAR */
+.navbar-wrapper {
+    background: var(--navbar-bg-color);
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: var(--navbar-height);
+    margin: auto;
+}
+
+.navbar-left {margin-left: 1rem;}
+.navbar-right {margin-right: 1rem;}
+
+/* NAVBAR - LEFT SIDE (NAVIGATION) */
+.navbar-left {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-left > * {
+    padding: 0 0.5rem 0 0.5rem;
+    text-decoration: none;
+    font-weight: 600;
+    color: var(--navbar-text-color);
+}
+
+.navbar-left > .dropdown-btn {display: none}
+
+.navbar-left > *:hover {
+    color: var(--navbar-text-highlight-color);
+    transition: color 0.2s linear;
+}
+
+
+/* NAVBAR - RIGHT SIDE (SEARCH BAR) */
+.search {
+    position: relative;
+    width: 200px;
+    border-bottom: 1px solid var(--navbar-text-color);
+    display: flex;
+    justify-content: flex-end;
+}
+
+.search > * {
+    border: none;
+    background: var(--navbar-bg-color);
+}
+
+.search > input {
+    color: var(--navbar-text-color);
+}
+
+.search:hover {
+    border-color: var(--navbar-text-highlight-color);
+}
+
+.search > input:focus,
+.search > input:hover {
+    outline: none;
+    color: var(--navbar-text-highlight-color);
+    font-weight: 700;
+}
+
+.search > button {
+    width: 2rem;
+}
+
+.search > button:hover {
+    outline: none;
+}
+
+@media all and (max-width: 425px) {
+    /* DROPDOWN NAVIGATION */
+    .navbar {
+        height: auto;
+    }
+    
+    .navbar-left {
+        display: block;
+        width: 50px;
+        margin: 0;
+    }
+
+    .navbar-left > * {
+        display: none;
+        padding: 0.5rem;
+        width: 100vw;
+        color: var(--navbar-text-highlight-color);
+    }
+
+    .navbar-left > .dropdown-btn {
+        display: block;
+        font-size: 1.5rem;
+        width: auto; /* to make space for search bar */
+    }
+
+    .navbar-left > *:not(.dropdown-btn) {
+        background: #384047;
+    }
+
+    /* show dropdown when clicked (use JS to add .dropdown to class) */
+    .navbar-left > * {display: none}
+    .navbar-left.dropdown > * {display: block}
+
+    /* HIDE SEARCH BAR */
+    .search {display: none}
+}
