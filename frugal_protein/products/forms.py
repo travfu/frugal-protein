@@ -23,7 +23,8 @@ class ProductSearchForm(forms.Form):
     search = forms.CharField(
         max_length = 255,
         widget = forms.TextInput({
-            'class': 'form_field'
+            'class': 'form_field',
+            'placeholder': 'search',
         })
     )
     brand = forms.ChoiceField(
