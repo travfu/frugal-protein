@@ -10,9 +10,13 @@
 }
 
 body {
+    background: rgb(236, 236, 236);
+    margin: 0;
+}
+
+body > *:not(.navbar-wrapper) {
     max-width: 1500px;
     margin: auto;
-    background: rgb(236, 236, 236)
 }
 
 /* FORM */
