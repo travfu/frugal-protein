@@ -84,11 +84,14 @@
     /* DROPDOWN NAVIGATION */
     .navbar {
         height: auto;
+        flex-wrap: wrap;
+        align-items: flex-start;
     }
     
     .navbar-left {
-        display: block;
-        width: 50px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
         margin: 0;
     }
 
@@ -109,10 +112,31 @@
         background: #384047;
     }
 
+    .search {
+        display: none;
+        flex-basis: 100%;
+        margin: 0;
+        padding: 0.5rem;
+        background: #384047;
+    }
+
+    .search > .form_field {
+        background: var(--navbar-bg-color);
+        color: var(--navbar-text-highlight-color);
+        border: 1px solid var(--navbar-text-highlight-color);
+        flex-basis: 100%;
+        padding: 0.5rem;
+    }
+
+    .search-submit-btn {
+        border: 1px solid white;
+        margin-left: -1px;
+    }  
+
     /* show dropdown when clicked (use JS to add .dropdown to class) */
     .navbar-left > * {display: none}
     .navbar-left.dropdown > * {display: block}
 
-    /* HIDE SEARCH BAR */
-    .search {display: none}
+    .navbar-right {display: none}
+    .navbar-right.dropdown {display: flex}
 }
