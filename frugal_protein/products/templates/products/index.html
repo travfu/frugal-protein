@@ -1,0 +1,56 @@
+{% extends "products/html_base.html" %}
+{% load static %}
+
+{% block header %}
+    <link rel="stylesheet" href="{% static "products/css/index.css" %}">
+{% endblock header %}
+
+{% block content %}
+    <div class="flex-wrapper">
+        <div class="flex-text">
+            <h1>Protein Price Checker</h1>
+        </div>
+        
+        <div class="flex-text">
+            <p>search for a product</p>
+        </div>
+        
+        <div>
+            <form action="{% url 'search' %}" method="get" class="flex-search">
+                {% csrf_token %}
+                {{ form.search }}
+                <button class="search-bar__submit">
+                    <svg viewBox="0 0 50 50">
+                        <g fill="none" stroke="white" stroke-width="5" stroke-linecap="round">
+                            <circle cx="20" cy="22" r="15"/>
+                            <path d="M33 35L45 47"/>
+                        </g>    
+                    </svg>
+                </button>
+            </form>
+        </div>
+        
+        <div class="flex-text">
+            <p>or</p>
+            <p>search with a barcode image</p>
+        </div>
+        
+        <div class="flex-barcode">
+            <form enctype="multipart/form-data" action="." method="post" class="barcode-img">
+                {% csrf_token %}
+                <div class="barcode-btn">
+                    <div class="barcode-img-text-container">
+                        <svg x="0px" y="0px" width="24" height="24" viewBox="0 0 24 24" style="fill:white">
+                            <g id="surface1">
+                                <path style=" " d="M 9 2 L 7 4 L 4 4 C 2.898438 4 2 4.898438 2 6 L 2 18 C 2 19.101563 2.898438 20 4 20 L 20 20 C 21.101563 20 22 19.101563 22 18 L 22 6 C 22 4.898438 21.101563 4 20 4 L 17 4 L 15 2 Z M 12 7 C 14.800781 7 17 9.199219 17 12 C 17 14.800781 14.800781 17 12 17 C 9.199219 17 7 14.800781 7 12 C 7 9.199219 9.199219 7 12 7 Z M 12 8.5 C 10.066406 8.5 8.5 10.066406 8.5 12 C 8.5 13.933594 10.066406 15.5 12 15.5 C 13.933594 15.5 15.5 13.933594 15.5 12 C 15.5 10.066406 13.933594 8.5 12 8.5 Z "/>
+                            </g>
+                        </svg>
+                        <span>Photo</span>
+                    </div>
+                    {{ form_barcode }}
+                </div>
+                <div class="barcode-error-msg">{{ error }}</div>
+            </form>
+        </div>
+    </div>
+{% endblock content %}

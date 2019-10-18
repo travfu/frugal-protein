@@ -1,0 +1,127 @@
+body {margin: 0 1rem 0 1rem;}
+
+/* Main flexbox container */
+.flex-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    min-height: 100vh;
+    font-family: 'Nunito Sans', sans-serif;
+}
+
+h1 {
+    font-family: 'Rubik', sans-serif;
+}
+.flex-text {
+    text-align: center;
+    font-size: 1em;
+}
+
+/* Search Bar - flexbox row adhering <input> and <button> together */
+.flex-search {
+    display: flex;
+    justify-content: center;
+    max-width: 650px;
+}
+
+#id_search {
+    flex-grow: 1;
+
+    padding: 5px 20px 5px 20px;
+    font-size: 1em;
+    font-family: 'Nunito Sans', sans-serif;
+
+    border: 2px solid #0074D9;
+    border-top-left-radius: 0.5rem;
+    border-bottom-left-radius: 0.5rem;
+    
+}
+
+.search-bar__submit {
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-basis: 30px;
+
+    border: none;
+    border-top-right-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
+    background-color: #0074D9;
+}
+
+
+/* div acts as anchor to allow <input type=file> and
+custom button to be overlayed in the same positions */
+.barcode-btn {
+    position: relative; 
+
+    background-color: #0074D9;
+    color: white;
+    margin: auto;
+}
+
+.barcode-btn, .barcode-input {
+    width: 100px;
+    height: 50px;
+    border-radius: 0.8rem;
+}
+
+/* <input> element is overlayed on top of button but 100% opaque, 
+giving the underlying custom button the illusion of being an 
+<input type=file> element */
+.barcode-input {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 2;
+    opacity: 0;
+}
+
+.barcode-img-text-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.barcode-img-text-container span {
+    margin-bottom: 5px;
+}
+
+.barcode-img-text-container svg {
+    height: 25px;
+    margin-top: 5px;
+}
+
+.barcode-error-msg {
+    margin: auto;
+    color: red;
+}
+
+
+.search-bar__submit:hover, 
+.barcode-btn:hover {
+    opacity: 0.6;
+}
+
+/* Remove 'form' outline when clicked */
+.search-bar__input:focus,
+.search-bar__submit:focus {
+    outline: none;
+}
+
+
+/* Medium Screens (i.e. tablet) */
+@media all and (min-width: 500px) {
+    .flex-search{width: 450px;}
+    .search-bar__input{font-size: 1em}
+}
+
+/* Large Screens (i.e. desktop) */
+@media all and (min-width: 800px) {
+    .flex-search{width: 650px}
+    .search-bar__input{font-size: 2em}
+    .search-bar__submit{flex-basis: 50px;}
+    .flex-text{font-size: 1.5em;}
+}

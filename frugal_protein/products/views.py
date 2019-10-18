@@ -1,11 +1,15 @@
 from django.shortcuts import render
-from django.views.generic import DetailView, ListView
+from django.views.generic import TemplateView, DetailView, ListView
 from django.views.generic.edit import FormMixin
 
 from . import models as m
 from . import forms
 
-# Create your views here.
+
+class Index(FormMixin, TemplateView):
+    template_name = 'products/index.html'
+    form_class = forms.ProductSearchForm
+
 class ProductView(FormMixin, DetailView):
     context_object_name = 'product'
     model = m.ProductInfo
