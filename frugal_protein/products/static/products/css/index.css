@@ -30,13 +30,12 @@ h1 {
     flex-grow: 1;
 
     padding: 5px 20px 5px 20px;
+    margin: 0;
     font-size: 1em;
     font-family: 'Nunito Sans', sans-serif;
 
     border: 2px solid #0074D9;
-    border-top-left-radius: 0.5rem;
-    border-bottom-left-radius: 0.5rem;
-    
+    border-radius: 0.5rem 0 0 0.5rem;
 }
 
 .search-bar__submit {
@@ -44,9 +43,9 @@ h1 {
     flex-shrink: 0;
     flex-basis: 30px;
 
+    margin: 0;
     border: none;
-    border-top-right-radius: 0.5rem;
-    border-bottom-right-radius: 0.5rem;
+    border-radius: 0 0.5rem 0.5rem 0;
     background-color: #0074D9;
 }
 

@@ -124,13 +124,16 @@
         background: var(--navbar-bg-color);
         color: var(--navbar-text-highlight-color);
         border: 1px solid var(--navbar-text-highlight-color);
+        border-radius: 0.5rem 0 0 0.5rem;
         flex-basis: 100%;
         padding: 0.5rem;
+        margin: 0;
     }
 
     .search-submit-btn {
         border: 1px solid white;
-        margin-left: -1px;
+        border-radius: 0 0.5rem 0.5rem 0;
+        margin: 0 0 0 -1px;
     }  
 
     /* show dropdown when clicked (use JS to add .dropdown to class) */
