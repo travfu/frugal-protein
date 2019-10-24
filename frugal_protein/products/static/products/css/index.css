@@ -1,3 +1,7 @@
+:root {
+    font-family: 'Nunito Sans', sans-serif;
+}
+
 body {margin: 0 1rem 0 1rem;}
 
 /* Main flexbox container */
@@ -8,15 +12,14 @@ body {margin: 0 1rem 0 1rem;}
     align-items: center;
 
     min-height: 100vh;
-    font-family: 'Nunito Sans', sans-serif;
 }
 
 h1 {
     font-family: 'Rubik', sans-serif;
 }
+
 .flex-text {
     text-align: center;
-    font-size: 1em;
 }
 
 /* Search Bar - flexbox row adhering <input> and <button> together */
@@ -31,11 +34,9 @@ h1 {
 
     padding: 5px 20px 5px 20px;
     margin: 0;
-    font-size: 1em;
-    font-family: 'Nunito Sans', sans-serif;
-
     border: 2px solid #0074D9;
     border-radius: 0.5rem 0 0 0.5rem;
+    font-size: 1em;
 }
 
 .search-bar__submit {
