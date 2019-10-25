@@ -1,5 +1,7 @@
 django
 psycopg2
+pyzbar
+Pillow
 
 # For deploying on Heroku
 django-heroku
