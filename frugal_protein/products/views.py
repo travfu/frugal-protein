@@ -1,14 +1,40 @@
 from django.shortcuts import render
 from django.views.generic import TemplateView, DetailView, ListView
 from django.views.generic.edit import FormMixin
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import HttpResponseRedirect
 
 from . import models as m
 from . import forms
+from .helper.barcode import decode_barcode
 
 
 class Index(FormMixin, TemplateView):
     template_name = 'products/index.html'
     form_class = forms.ProductSearchForm
+
+    def post(self, request):
+        barcode_form = forms.Barcode(request.POST, request.FILES)
+
+        if barcode_form.is_valid:
+            img_file = barcode_form.files['barcode_img']
+            barcode = decode_barcode(img_file)
+
+            if len(barcode) >= 1:
+                try:
+                    query_result = m.ProductInfo.objects.get(barcode=barcode[0])
+                except ObjectDoesNotExist:
+                    context = self.get_context_data(error="Product not found in database")
+                    return self.render_to_response(context)
+                else:
+                    return HttpResponseRedirect(f'product/{query_result.pid}')
+        context = self.get_context_data(error="No barcode found in image")
+        return self.render_to_response(context)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form_barcode'] = forms.Barcode
+        return context
 
 class ProductView(FormMixin, DetailView):
     context_object_name = 'product'

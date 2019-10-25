@@ -81,3 +81,15 @@ class ProductSearchForm(forms.Form):
         choice_tuples = [(store, store.title()) for store in stores]
         choice_tuples.insert(0, ('all', 'All Stores'))
         return choice_tuples
+
+
+class Barcode(forms.Form):
+    barcode_img = forms.ImageField(
+        label = "",
+        widget = forms.ClearableFileInput(
+            {
+                'onchange':'this.form.submit()',
+                'class': 'barcode-input'
+            }
+        )
+    )
