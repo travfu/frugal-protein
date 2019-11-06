@@ -15,10 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-import calculator.views as calculator
+from calculator.views import ProteinCalculator
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('products.urls')),
-    path('protein-price-calculator', calculator.calculator, name='protein_calculator')
+    path('protein-price-calculator', ProteinCalculator.as_view(), name='protein_calculator')
 ]

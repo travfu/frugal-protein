@@ -1,5 +1,4 @@
-from django.shortcuts import render
+from django.views.generic import TemplateView
 
-# Create your views here.
-def calculator(request):
-    return render(request, 'calculator/calc.html')
+class ProteinCalculator(TemplateView):
+    template_name = 'calculator/calc.html'
