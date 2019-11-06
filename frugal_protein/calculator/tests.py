@@ -9,3 +9,7 @@ class TestCalculator(TestCase):
     def test_url_dispatcher(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
+    
+    def test_form_in_context_in_get_response(self):
+        response = self.client.get(self.url)
+        self.assertIsNotNone(response.context.get('form'))
