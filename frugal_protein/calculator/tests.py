@@ -1,5 +1,6 @@
 from decimal import Decimal
 from selenium.webdriver.chrome.webdriver import WebDriver
+from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
 
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
@@ -98,15 +99,17 @@ class TestCalculatorLiveServer(StaticLiveServerTestCase):
         cls.selenium = WebDriver()
         cls.selenium.implicitly_wait(10)
         cls.url = cls.live_server_url + reverse('protein_calculator')
-        
+        cls.selenium.get(cls.url)
+
     @classmethod
     def tearDownClass(cls):
         cls.selenium.quit()
         super().tearDownClass()
-    
-    def test_form_is_displayed(self):
-        """ Selenium will raise a NoSuchElementException if a form element not found """
-        self.selenium.get(self.url)
+        
+    def test_form_post(self):
+        """ 
+        Submitting a valid form should return calculation results
+        """
         try:
             price_value = self.selenium.find_element_by_name('price_value')
             qty_value = self.selenium.find_element_by_name('qty_value')
@@ -114,5 +117,34 @@ class TestCalculatorLiveServer(StaticLiveServerTestCase):
             protein_value = self.selenium.find_element_by_name('protein_value')
             protein_per_value = self.selenium.find_element_by_name('protein_per_value')
             protein_per_unit = self.selenium.find_element_by_name('protein_per_unit')
+            submit_btn = self.selenium.find_element_by_css_selector('button')
         except NoSuchElementException as e:
             self.fail(e)
+
+        def send_keys(element, value):
+            element.clear()
+            element.send_keys(value)
+
+        def select_option(element, value):
+            select_element = Select(element)
+            select_element.select_by_value(value)
+
+        # Input test product: £2.00, 1.5litre, 20g protein per 100ml
+        send_keys(price_value, '2')
+        send_keys(qty_value, '1.5')
+        select_option(qty_unit, 'l')
+        send_keys(protein_value, '20')
+        send_keys(protein_per_value, '100')
+        select_option(protein_per_unit, 'ml')
+        
+        # Submit form
+        submit_btn.click()
+
+        # Read results
+        unit_price = self.selenium.find_element_by_id('unit_price')
+        protein_price = self.selenium.find_element_by_id('protein_price')
+        e_unit_price_text = 'Unit Price: £1.33/L'
+        e_protein_price_text = 'Price Per 10g Protein: £0.06'
+
+        self.assertEqual(unit_price.text, e_unit_price_text)
+        self.assertEqual(protein_price.text, e_protein_price_text)
