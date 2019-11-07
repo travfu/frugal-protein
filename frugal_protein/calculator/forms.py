@@ -6,7 +6,7 @@ class ProteinCalcInput(forms.Form):
     to a unit (e.g. 1g or 1L) and relative to amount of protein
     """
     # dropdown choices format: (value, display text)
-    MEASUREMENTS = [('g', 'g'), ('kg', 'kg'), ('ml', 'ml'), ('l', 'litre'), ('sngl', 'unit')]
+    UNITS = [('g', 'g'), ('kg', 'kg'), ('ml', 'ml'), ('l', 'litre'), ('sngl', 'unit')]
     
     # Sample input:
     # product A - £2.00, 1.5litre, 20g protein per 100ml
@@ -18,8 +18,40 @@ class ProteinCalcInput(forms.Form):
     #   protein_per_unit = ml
     price_value = forms.DecimalField()
     qty_value = forms.DecimalField()
-    qty_unit = forms.ChoiceField(choices=MEASUREMENTS)
+    qty_unit = forms.ChoiceField(choices=UNITS)
     protein_value = forms.DecimalField()
     protein_per_value = forms.DecimalField()
-    protein_per_unit = forms.ChoiceField(choices=MEASUREMENTS)
+    protein_per_unit = forms.ChoiceField(choices=UNITS)
+    
+    def full_clean(self):
+        super().full_clean()
+        self.standardise_data()
+
+    def standardise_data(self):
+        """
+        Return bound form data that has been standardised to represent values
+        in kg, litre, or unit. (i.e. Convert g to kg, and ml to litre)
+
+        price_value and protein_value do not need to be standardised. Protein
+        value has an assumed unit of grams.
+        """
+        # Input data that do not pass Django's form validation should not reach 
+        # this point, thus, it can be assumed that all fields have valid data 
+        # and have been cleaned and converted to Python types (e.g. Decimal).
+
+        data = self.cleaned_data
+        if data['qty_unit'] == 'g':
+            data['qty_unit'] = 'kg'
+            data['qty_value'] /= 1000
+
+        elif data['qty_unit'] == 'ml':
+            data['qty_unit'] = 'l'
+            data['qty_value'] /= 1000
         
+        if data['protein_per_unit'] == 'g':
+            data['protein_per_unit'] = 'kg'
+            data['protein_per_value'] /= 1000
+        
+        elif data['protein_per_unit'] == 'ml':
+            data['protein_per_unit'] = 'l'
+            data['protein_per_value'] /= 1000
