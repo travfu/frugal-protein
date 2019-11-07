@@ -24,6 +24,9 @@ class ProteinCalcInput(forms.Form):
     protein_per_unit = forms.ChoiceField(choices=UNITS)
     
     def full_clean(self):
+        """ 
+        https://github.com/django/django/blob/58c1acb1d6054dfec29d0f30b1033bae6ef62aec/django/forms/forms.py#L360
+        """
         super().full_clean()
         self.standardise_data()
 
