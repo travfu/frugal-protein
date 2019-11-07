@@ -1,5 +1,13 @@
 {% extends "products/html_base.html" %}
 
 {% block content %}
-    <div>test</div>
+    <div>
+        <form action="{% url 'protein_calculator' %}" method="post">
+            {% csrf_token %}
+            <div>Price: {{ form.price_value }}</div>
+            <div>Total quantity: {{ form.qty_value }}{{ form.qty_unit }}</div>
+            <div>Protein: {{ form.protein_value }}g per {{ form.protein_per_value }}{{ form.protein_per_unit }}</div>
+            <button>Submit</button>
+        </form>
+    </div>
 {% endblock content %}
