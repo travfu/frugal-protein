@@ -42,8 +42,7 @@ class TestCalculator(TestCase):
         """
         self.assertIsNotNone(self.response.context)
         self.assertIsNotNone(self.response.context.get('form'))
-        self.assertIsNotNone(self.response.context.get('unit_price'))
-        self.assertIsNotNone(self.response.context.get('protein_price'))
+        self.assertIsNotNone(self.response.context.get('results'))
 
     def test_invalid_post_request_returns_relevant_data_in_context(self):
         """
@@ -55,10 +54,9 @@ class TestCalculator(TestCase):
         response = self.client.post(self.url, invalid_data)
         self.assertIsNotNone(response.context)
         self.assertIsNotNone(response.context.get('form'))
-        self.assertIsNone(response.context.get('unit_price'))
-        self.assertIsNone(response.context.get('protein_price'))
+        self.assertIsNone(response.context.get('results'))
 
-    def test_standardise_clean_data(self):
+    def test_standardise_units(self):
         """ 
         Form instance should standardise data as part of the data cleaning
         process. Standardising data involves converting relevant form field data
@@ -81,12 +79,12 @@ class TestCalculator(TestCase):
         self.assertEqual(data['protein_per_unit'], 'kg') 
 
     def test_calc_unit_price(self):
-        unit_price = self.response.context.get('unit_price')
+        unit_price = self.response.context['results']['unit_price']
         e_unit_price = Decimal(100)
         self.assertEqual(unit_price, e_unit_price)
 
     def test_calc_protein_price(self):
-        protein_price = self.response.context.get('protein_price')
+        protein_price = self.response.context['results']['protein_price']
         e_protein_price = Decimal(5).quantize(protein_price)
         self.assertEqual(protein_price, e_protein_price)
 
@@ -143,8 +141,8 @@ class TestCalculatorLiveServer(StaticLiveServerTestCase):
         # Read results
         unit_price = self.selenium.find_element_by_id('unit_price')
         protein_price = self.selenium.find_element_by_id('protein_price')
-        e_unit_price_text = 'Unit Price: £1.33/L'
-        e_protein_price_text = 'Price Per 10g Protein: £0.06'
+        e_unit_price_text = 'Unit Price: £1.33/litre'
+        e_protein_price_text = 'Price Per 10g Protein: £0.07'
 
         self.assertEqual(unit_price.text, e_unit_price_text)
         self.assertEqual(protein_price.text, e_protein_price_text)

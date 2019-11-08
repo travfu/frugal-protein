@@ -28,6 +28,9 @@ class ProteinCalcInput(forms.Form):
         https://github.com/django/django/blob/58c1acb1d6054dfec29d0f30b1033bae6ef62aec/django/forms/forms.py#L360
         """
         super().full_clean()
+        # Don't proceed if input data failed Django's in-built validation
+        if self._errors:
+            return
         self.standardise_data()
 
     def standardise_data(self):

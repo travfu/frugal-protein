@@ -1,5 +1,7 @@
 {% extends "products/html_base.html" %}
 
+{% load products_filters %}
+
 {% block content %}
     <div>
         <form action="{% url 'protein_calculator' %}" method="post">
@@ -10,4 +12,11 @@
             <button>Submit</button>
         </form>
     </div>
+
+    {% if results %}
+    <div>        
+        <div id="unit_price">Unit Price: £{{ results.unit_price|floatformat:2 }}/{{ results.unit|formatuom }}</div>
+        <div id="protein_price">Price Per 10g Protein: £{{ results.protein_price|floatformat:2 }}</div>
+    </div>
+    {% endif %}
 {% endblock content %}

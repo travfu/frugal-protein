@@ -14,9 +14,12 @@ class ProteinCalculator(TemplateView):
         context = self.get_context_data()
         if form.is_valid():
             unit_price, protein_price = self.calc_prices(form.cleaned_data)
-            context['unit_price'] = unit_price
-            protein_amount = 10  # int value in 'price per 10g protein'
-            context['protein_price'] = protein_amount * protein_price
+            results = {
+                'unit_price': unit_price,
+                'unit': self.standardise_unit(form.cleaned_data['qty_unit']),
+                'protein_price': 10 * protein_price, # price per 10g protein
+            }
+            context['results'] = results
         return self.render_to_response(context)
 
     def calc_prices(self, data_dict):
@@ -40,3 +43,11 @@ class ProteinCalculator(TemplateView):
         protein_price = unit_price * protein_per_value * (1 / protein_value)
 
         return (unit_price, protein_price)
+
+    def standardise_unit(self, unit):
+        if unit == 'g':
+            return 'kg'
+        elif unit == 'ml':
+            return 'l'
+        return unit
+        
