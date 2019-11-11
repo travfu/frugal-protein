@@ -24,10 +24,9 @@ class ProteinCalcInput(forms.Form):
     protein_per_unit = forms.ChoiceField(choices=UNITS)
     
     def full_clean(self):
-        """ 
-        https://github.com/django/django/blob/58c1acb1d6054dfec29d0f30b1033bae6ef62aec/django/forms/forms.py#L360
-        """
+        # doc: https://github.com/django/django/blob/58c1acb1d6054dfec29d0f30b1033bae6ef62aec/django/forms/forms.py#L360
         super().full_clean()
+        
         # Don't proceed if input data failed Django's in-built validation
         if self._errors:
             return
@@ -35,12 +34,12 @@ class ProteinCalcInput(forms.Form):
 
     def standardise_data(self):
         """
-        Return bound form data that has been standardised to represent values
-        in kg, litre, or unit. (i.e. Convert g to kg, and ml to litre)
-
-        price_value and protein_value do not need to be standardised. Protein
-        value has an assumed unit of grams.
+        Standardises bound form data to represent values in kg, litre, or unit. 
+        (i.e. Convert g to kg, and ml to litre)
         """
+        # price_value and protein_value do not need to be standardised. Protein
+        # value has an assumed unit of grams.
+
         # Input data that do not pass Django's form validation should not reach 
         # this point, thus, it can be assumed that all fields have valid data 
         # and have been cleaned and converted to Python types (e.g. Decimal).
