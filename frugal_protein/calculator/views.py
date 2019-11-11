@@ -1,13 +1,10 @@
 from django.views.generic import TemplateView
+from django.views.generic.edit import FormMixin
 from calculator.forms import ProteinCalcInput
 
-class ProteinCalculator(TemplateView):
+class ProteinCalculator(FormMixin, TemplateView):
     template_name = 'calculator/calc.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['form'] = ProteinCalcInput
-        return context
+    form_class = ProteinCalcInput
     
     def post(self, request):
         form = ProteinCalcInput(request.POST, request.FILES)
