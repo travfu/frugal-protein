@@ -16,11 +16,11 @@ class ProteinCalcInput(forms.Form):
     #   protein_value = 20
     #   protein_per_value = 100
     #   protein_per_unit = ml
-    price_value = forms.DecimalField()
-    qty_value = forms.DecimalField()
+    price_value = forms.DecimalField(min_value=0, decimal_places=2)
+    qty_value = forms.DecimalField(min_value=0.001, decimal_places=3)
     qty_unit = forms.ChoiceField(choices=UNITS)
-    protein_value = forms.DecimalField()
-    protein_per_value = forms.DecimalField()
+    protein_value = forms.DecimalField(min_value=0.1, decimal_places=1)
+    protein_per_value = forms.DecimalField(min_value=0.001, decimal_places=3)
     protein_per_unit = forms.ChoiceField(choices=UNITS)
     
     def full_clean(self):
