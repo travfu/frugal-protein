@@ -88,6 +88,35 @@ class TestCalculator(TestCase):
         e_protein_price = Decimal(5).quantize(protein_price)
         self.assertEqual(protein_price, e_protein_price)
 
+    def test_unit_compatability(self):
+        """
+        Error should be raised if units are incompatible.
+
+        An example of incompatability is a 100g product with 20g protein per 
+        100ml - 100g and 100ml are incompatible. On the other hand, 1kg and 
+        100g would be compatible.
+        """
+        def get_form_field_error(data):
+            response = self.client.post(self.url, data)
+            form = response.context.get('form')
+            qty_unit = form.errors.get('qty_unit')
+            protein_per_unit = form.errors.get('protein_per_unit')
+            return (qty_unit, protein_per_unit)
+
+        # g and kg are compatible
+        data = self.data.copy()
+        data['qty_unit'] = 'g'
+        data['protein_per_unit'] = 'kg'
+        qty_unit, protein_per_unit = get_form_field_error(data)
+        self.assertIsNone(qty_unit)
+        self.assertIsNone(protein_per_unit)
+       
+        # kg and ml are incompatible
+        data['qty_unit'] = 'kg'
+        data['protein_per_unit'] = 'ml'
+        qty_unit, protein_per_unit = get_form_field_error(data)
+        self.assertIsNotNone(qty_unit)
+        self.assertIsNotNone(protein_per_unit)
 
 class TestCalculatorLiveServer(StaticLiveServerTestCase):
     """ https://docs.djangoproject.com/en/2.2/topics/testing/tools/#liveservertestcase """
@@ -134,7 +163,7 @@ class TestCalculatorLiveServer(StaticLiveServerTestCase):
         send_keys(protein_value, '20')
         send_keys(protein_per_value, '100')
         select_option(protein_per_unit, 'ml')
-        
+
         # Submit form
         submit_btn.click()
 
