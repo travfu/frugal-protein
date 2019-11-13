@@ -1,22 +1,100 @@
-{% extends "products/html_base.html" %}
+{% extends "products/bootstrap_base.html" %}
 
+{% load static %}
 {% load products_filters %}
+{% load html_addon_filters %}
+
+{% block header %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static "calculator/css/calc.css" %}">
+{% endblock header %}
+
+{% block script %}
+    {{ block.super }}
+    <script src="{% static "calculator/js/calc.js" %}"></script>
+{% endblock script %}
 
 {% block content %}
-    <div>
-        <form action="{% url 'protein_calculator' %}" method="post">
-            {% csrf_token %}
-            <div>Price: {{ form.price_value }}</div>
-            <div>Total quantity: {{ form.qty_value }}{{ form.qty_unit }}</div>
-            <div>Protein: {{ form.protein_value }}g per {{ form.protein_per_value }}{{ form.protein_per_unit }}</div>
-            <button>Submit</button>
-        </form>
-    </div>
+    <div class="container col-11 col-md-7 mt-5 mb-5">
+        <div class="card">
+            <h3 class="card-header">Protein Price Calculator</h3>
+            <div class="card-body">
+                <form action="{% url "protein_calculator" %}" method="post">
+                    {% csrf_token %}
+                    <div>
+                        <div class="row form-group">
+                            <div class="col-md-2 col-form-label text-nowrap">Price:</div>
+                            <div class="col-md-10 input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">£</span>
+                                </div>
+                                {{ form.price_value|add_class:"form-control" }}
+                            </div>
+                        </div>
+                    </div>
 
-    {% if results %}
-    <div>        
-        <div id="unit_price">Unit Price: £{{ results.unit_price|floatformat:2 }}/{{ results.unit|formatuom }}</div>
-        <div id="protein_price">Price Per 10g Protein: £{{ results.protein_price|floatformat:2 }}</div>
-    </div>
-    {% endif %}
+                    <div>
+                        <div class="row form-group">
+                            <div class="col-md-2 col-form-label text-nowrap">Quantity:</div>
+                            
+                            <div class="col-md-10 input-group">
+                                {{ form.qty_value|add_class:"col-md-9 form-control" }}
+                                {{ form.qty_unit|add_class:"col-md-3 form-control" }}
+                            </div>
+
+                            {% if form.qty_value.errors or form.qty_unit.errors %}
+                                <div class="offset-md-2 pl-3">
+                                    <span class="text-danger">{{ form.qty_value.errors.as_text }}</span>
+                                    <span class="text-danger">{{ form.qty_unit.errors.as_text }}</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="row form-group">
+                            <div class="col-md-2 col-form-label text-nowrap">Protein:</div>
+                           
+                            <div class="col-md-4 input-group">
+                                {{ form.protein_value|add_class:"form-control" }}
+                                <div class="input-group-append">
+                                    <span class="input-group-text">g</span>
+                                </div>
+                                
+                            </div>
+
+                            <span class="col-md-1 pl-0 pr-0 text-center">per</span>
+
+                            <div class="col-md-5 input-group">
+                                {{ form.protein_per_value|add_class:"form-control" }}
+                                {{ form.protein_per_unit|add_class:"form-control" }}
+                            </div>
+
+                            {% if form.protein_per_value.errors or form.protein_per_unit.errors %}
+                                <div class="offset-md-2 pl-3">
+                                    <span class="text-danger">{{ form.protein_per_value.errors.as_text }}</span>
+                                    <span class="text-danger">{{ form.protein_per_unit.errors.as_text }}</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="offset-md-2 col">
+                            <div class="d-flex flex-wrap">
+                                <button class="btn btn-primary mr-2 mb-2" type="submit">Calculate</button>
+                                <button class="btn btn-outline-danger mb-2" type="reset" id="btn-reset">Reset</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            {% if results %}
+                <div class="card-body bg-light">        
+                    <h6 id="unit_price">Unit Price: £{{ results.unit_price|floatformat:2 }}/{{ results.unit|formatuom }}</h6>
+                    <h6 id="protein_price">Price Per 10g Protein: £{{ results.protein_price|floatformat:2 }}</h6>
+                </div>
+            {% endif %}
+        </div>
 {% endblock content %}
