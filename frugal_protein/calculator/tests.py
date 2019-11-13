@@ -177,6 +177,7 @@ class TestCalculatorLiveServer(StaticLiveServerTestCase):
             protein_per_unit = self.selenium.find_element_by_name('protein_per_unit')
         except NoSuchElementException as e:
             self.fail(e)
+
         self.assertEqual(price_value.get_attribute('value'), '2')
         self.assertEqual(qty_value.get_attribute('value'), '1.5')
         self.assertEqual(qty_unit.get_attribute('value'), 'l')
@@ -192,3 +193,15 @@ class TestCalculatorLiveServer(StaticLiveServerTestCase):
 
         self.assertEqual(unit_price.text, e_unit_price_text)
         self.assertEqual(protein_price.text, e_protein_price_text)
+
+        # Click reset button to clear form values
+        try: 
+            reset_btn = self.selenium.find_element_by_id('btn-reset')
+        except NoSuchElementException as e:
+            self.fail(e)
+        reset_btn.click()
+
+        self.assertEqual(price_value.get_attribute('value'), '')
+        self.assertEqual(qty_value.get_attribute('value'), '')
+        self.assertEqual(protein_value.get_attribute('value'), '')
+        self.assertEqual(protein_per_value.get_attribute('value'), '')
