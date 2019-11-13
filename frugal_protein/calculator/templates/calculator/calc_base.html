@@ -1,0 +1,43 @@
+{% extends "products/bootstrap_base.html" %}
+
+{% load static %}
+
+
+{% block header %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static "calculator/css/calc.css" %}">
+{% endblock header %}
+
+
+{% block script %}
+    {{ block.super }}
+    <script src="{% static "calculator/js/calc.js" %}"></script>
+{% endblock script %}
+
+
+{% block content %}
+    <div class="container col-11 col-md-7 mt-5 mb-5">
+        <div class="card">
+            <h3 class="card-header">Protein Price Calculator</h3>
+            <div class="card-body">
+                <form action="{% url "protein_calculator" %}" method="post">
+                    {% csrf_token %}
+                    
+                    
+                    {% block form_fields %}{% endblock form_fields %}
+
+
+                    <div class="row">
+                        <div class="offset-md-2 col">
+                            <div class="d-flex flex-wrap">
+                                <button class="btn btn-primary mr-2 mb-2" type="submit">Calculate</button>
+                                <button class="btn btn-outline-danger mb-2" type="reset" id="btn-reset">Reset</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            {% block results %}{% endblock results %}
+        </div>
+{% endblock content %}
