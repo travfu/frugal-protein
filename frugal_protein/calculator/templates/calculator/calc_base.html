@@ -6,6 +6,8 @@
 {% block header %}
     {{ block.super }}
     <link rel="stylesheet" href="{% static "calculator/css/calc.css" %}">
+    <link rel="stylesheet" href="{% static "products/css/navbar.css"%}">
+    <script src="{% static "products/js/responsive_navbar.js" %}"></script>
 {% endblock header %}
 
 
@@ -16,6 +18,35 @@
 
 
 {% block content %}
+    <div class="navbar-wrapper">
+        <div class="navbar">
+            <div class="navbar-left" id="navbar-dropdown">
+                <div class="dropdown-btn" id="navbar-left-dropdown-btn">≡</div>
+                <a href="/">Home</a>
+                <a href="">Protein Calculator</a>
+            </div>
+            <form action="{% url 'search' %}" method="get" class="navbar-right search">
+                {% csrf_token %}
+                {{ form.search }}
+                <button class="search-submit-btn">
+                    <svg class="search-icon"viewBox="0 0 50 50">
+                        <g fill="none" stroke="#8899AB" stroke-width="5" stroke-linecap="round">
+                            <circle cx="20" cy="22" r="15"/>
+                            <path d="M33 35L45 47"/>
+                        </g>    
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="image-wrapper">{% block img %}{% endblock img %}</div>
+        <div class="title-wrapper">{% block description %}{% endblock description %}</div>
+        <div class="nutrition-wrapper">{% block nutrition %}{% endblock nutrition %}</div>
+        <div class="prices-wrapper">{% block prices %}{% endblock prices %}</div>
+    </div>
+    
     <div class="container col-11 col-md-7 mt-5 mb-5">
         <div class="card">
             <h3 class="card-header">Protein Price Calculator</h3>
