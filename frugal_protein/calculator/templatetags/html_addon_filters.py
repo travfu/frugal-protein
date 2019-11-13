@@ -44,12 +44,12 @@ if __name__ == '__main__':
     from django.utils.safestring import SafeText
 
     class TestFilters(unittest.TestCase):
-        def test_add_class_no_class(self):
+        def test_add_class_no_existing_class(self):
             html = '<input type="number">'
             e_html = '<input class="test" type="number">'
             self.assertEqual(add_class(html, 'test'), e_html)
 
-        def test_add_class_has_class(self):
+        def test_add_class_has_existing_class(self):
             html = '<input class="value" type="number">'
             e_html = '<input class="value test" type="number">'
             self.assertEqual(add_class(html, 'test'), e_html)
