@@ -20,10 +20,11 @@ def formatprice(value):
 def formatuom(value):
     """Translates measurement units to reader-friendly text"""
     options = {
-        'SNGL': 'item',
+        'sngl': 'item',
         'l': 'litre'
     }
     
+    value = value.lower()
     if any(value == option for option in options):
         return options[value]
     else:
