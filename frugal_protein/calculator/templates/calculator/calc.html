@@ -63,8 +63,8 @@
 {% block results %}
     {% if results %}
         <div class="card-body bg-light">        
-            <h6 id="unit_price">Unit Price: £{{ results.unit_price|floatformat:2 }}/{{ results.unit|formatuom }}</h6>
-            <h6 id="protein_price">Price Per 10g Protein: £{{ results.protein_price|floatformat:2 }}</h6>
+            <h6 class="text-center m-3" id="unit_price">£{{ results.unit_price|floatformat:2 }}/{{ results.unit|formatuom }}</h6>
+            <h6 class="text-center m-3" id="protein_price">£{{ results.protein_price|floatformat:2 }} per 10g Protein</h6>
         </div>
     {% endif %}
 {% endblock results%}
