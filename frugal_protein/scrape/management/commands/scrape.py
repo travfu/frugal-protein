@@ -82,7 +82,11 @@ class Command(BaseCommand):
 
 
     def scrape_ids(self, stores=None):
-        pass
+        stores = stores or self.valid_stores
+        for store in stores:
+            for id_dicts in scrape_ids(store):
+                # save/update results
+                pass
     
 
     def scrape_infos(self, stores=None):
