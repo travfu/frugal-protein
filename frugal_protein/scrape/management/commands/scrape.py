@@ -24,10 +24,10 @@ Design Restrictions:
 """
 
 from django.core.management.base import BaseCommand
+from django.db.models import Q
 
+from frugal_protein_scrapers.scrapers import scrape_ids, scrape_infos
 from products.models import Brands, ProductInfo
-
-from frugal_protein_scrapers.scrapers import scrape_ids
 
 
 class Command(BaseCommand):
@@ -90,10 +90,63 @@ class Command(BaseCommand):
     
 
     def scrape_infos(self, stores=None):
-        pass
+        stores = stores or self.valid_stores        
+        for store in stores[:1]:
+            products = self.get_rows_for_info_scrape(store)
+            for product in products[:1]:
+                pid = getattr(product, store)
+                info_dict = scrape_infos(pid, store)
+                self.update_info_result(info_dict, product)
     
 
     def scrape_prices(self, stores=None):
         pass
         
 
+    def get_rows_for_info_scrape(self, store):
+        """ 
+        Returns a queryset for products associated with a store that require
+        info scraping (i.e. have missing info values)        
+        """
+        store_filter = {f'{store}__isnull': False}
+        rows = ProductInfo.objects.filter(**store_filter)
+        rows = rows.filter(Q(description='') | 
+                           Q(qty__isnull=True) |
+                           Q(protein__isnull=True))
+        return rows
+
+    
+    def update_info_result(self, info_dict, product):
+        """ Updates row by replacing empty field values with scraped values """
+        qty = info_dict.get('qty_dict')
+        nutrition = info_dict.get('nutrition_dict')
+        
+        if not product.description and info_dict.get('description'):
+            product.description = info_dict['description']
+
+        if not product.brand and info_dict.get('brand'):
+            product.brand = self.get_brand_object(info_dict['brand'])
+
+        if not product.qty and qty:
+            product.qty = qty['qty']
+            product.num_of_units = qty['num_of_units']
+            product.total_qty = qty['total_qty']
+            product.unit_of_measurement = qty['unit_of_measurement']
+
+        if not product.protein and nutrition:
+            product.header = nutrition['header']
+            product.kcal = nutrition['kcal']
+            product.fat = nutrition['fat']
+            product.carb = nutrition['carb']
+            product.protein = nutrition['protein']
+        
+        product.save()
+
+    def get_brand_object(self, brand):
+        """ Returns a Brands object """
+        existing_brand = Brands.objects.filter(brand=brand)
+        if existing_brand:
+            return existing_brand[0]
+        else:
+            return Brands.objects.create(brand=brand)
+            

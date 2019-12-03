@@ -4,15 +4,17 @@ from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.test import TestCase
 
+from products.models import ProductInfo, Brands
 from scrape.management.commands.scrape import Command
 
-# Notes on call_command:
-#   named args can be passed into call_command as kwargs but these kwargs are 
-#   passed to the command without triggering the argument parser, and thus, 
-#   may not undergo argument parser validations. Therefore, pass named args as 
-#   positional args.
 
-class ScrapeCommandTest(TestCase):
+class TestScrapeCommand(TestCase):
+    # Notes on call_command:
+    #   named args can be passed into call_command as kwargs but these kwargs 
+    #   are passed to the command without triggering the argument parser, and 
+    #   thus, may not undergo argument parser validations. Therefore, pass 
+    #   named args as positional args.
+
     def test_invalid_scrape_type(self):
         """ Error should be raised if an invalid arg is passed in """
         with self.assertRaises(CommandError):
@@ -45,3 +47,135 @@ class ScrapeCommandTest(TestCase):
         with patch.object(Command, 'scrape_prices') as mock_method:
             call_command('scrape', 'price', '-a')
             mock_method.assert_called_once()
+
+ 
+class TestRowFiltering(TestCase):    
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        cls.command = Command()
+
+        cls.desc = {'description': 'sample product'}
+        cls.qty = {'qty': 1, 
+                   'num_of_units': 1, 
+                   'total_qty': 1, 
+                   'unit_of_measurement': 'g'}
+        cls.nutr = {'header': 'per 100g', 
+                    'kcal': 1, 
+                    'fat': 1, 
+                    'carb': 1, 
+                    'protein': 1}
+
+    
+    def test_get_rows_for_info_scrape(self):
+        """ Should return rows that require info scraping """
+        # Arrange
+        ProductInfo.objects.create(
+            pid=1, tesco='1', **self.desc, **self.qty, **self.nutr
+        )
+        ProductInfo.objects.create(
+            pid=2, tesco='2', **self.desc
+        )
+
+        # Act
+        rows = self.command.get_rows_for_info_scrape('tesco')
+        row = [row.pid for row in rows]
+        e_res = [2]
+
+        # Assert
+        self.assertEqual(row, e_res)
+
+
+    def test_get_rows_for_info_scrape_OR_operator(self):
+        """ 
+        Should return rows that have missing description OR qty OR nutrition 
+        """
+        ProductInfo.objects.create(
+            pid=1, tesco='1', **self.desc, **self.qty
+        )
+        ProductInfo.objects.create(
+            pid=2, tesco='2', **self.desc, **self.nutr
+        )
+        ProductInfo.objects.create(
+            pid=3, tesco='3', **self.qty, **self.nutr
+        )
+
+        rows = self.command.get_rows_for_info_scrape('tesco')
+        rows = [row.pid for row in rows]
+        e_res = [1, 2, 3]
+
+        self.assertEqual(rows, e_res)
+
+class TestScrapeInfo(TestCase):
+    def test_update_info(self):
+        # Arrange - Insert product without any product info into db
+        product = ProductInfo.objects.create(pid=1, tesco='1')
+
+        # Act
+        info_dict = {'description': 'sample product',
+                    #  'brand': 'sample brand',
+                     'qty_dict': {'qty': 1, 
+                                  'num_of_units': 1, 
+                                  'total_qty': 1, 
+                                  'unit_of_measurement': 'g'},
+                     'nutrition_dict': {'header': 'per 100g', 
+                                        'kcal': 1, 
+                                        'fat': 1, 
+                                        'carb': 1, 
+                                        'protein': 1}}                    
+        Command().update_info_result(info_dict, product)
+
+        # Assert description and brand is updated
+        self.assertEqual(product.description, info_dict['description'])
+        
+        # Assert quantity is updated
+        qty = info_dict['qty_dict']
+        self.assertEqual(product.qty, qty['qty'])
+        self.assertEqual(product.num_of_units, qty['num_of_units'])
+        self.assertEqual(product.total_qty, qty['total_qty'])
+        self.assertEqual(product.num_of_units, qty['num_of_units'])
+        
+        # Assert nutrition is updated
+        nutrition = info_dict['nutrition_dict']
+        self.assertEqual(product.header, nutrition['header'])
+        self.assertEqual(product.kcal, nutrition['kcal'])
+        self.assertEqual(product.fat, nutrition['fat'])
+        self.assertEqual(product.carb, nutrition['carb'])
+        self.assertEqual(product.protein, nutrition['protein'])
+
+    def test_update_info_does_not_overwrite_existing(self):
+        """ Existing info should not be overwritten """
+        product = ProductInfo.objects.create(pid=1, tesco=1, description='x')
+        info_dict = {'description': 'sample product'}                    
+        Command().update_info_result(info_dict, product)
+        
+        # Assert description is not overwritten
+        self.assertEqual(product.description, 'x')
+
+    def test_update_info_brand(self):
+        """ Brand should be a reference (Foreign Key) to a brand object """
+        product = ProductInfo.objects.create(pid=1, tesco=1)
+        info_dict = {'brand': 'brand X'}
+        Command().update_info_result(info_dict, product)
+
+        e_res = Brands.objects.filter(brand=info_dict['brand'])
+        self.assertEqual(product.brand, e_res[0]) 
+
+    def test_get_brand_object_new_brand(self):
+        """ Should insert new brand to db and return as object """        
+        res = Command().get_brand_object('brand X')
+        row_count = len(Brands.objects.filter(brand='brand X'))
+        self.assertEqual(row_count, 1) # assert new row created
+        self.assertEqual(res.brand, 'brand X')
+
+    def test_get_brand_object_existing_brand(self):
+        """ 
+        Should not insert new brand but return brand object that already 
+        exists in db 
+        """
+        Brands.objects.create(brand='brand X')
+        res = Command().get_brand_object('brand X')
+        row_count = len(Brands.objects.filter(brand='brand X'))
+        self.assertEqual(row_count, 1) # assert no new rows created
+        self.assertEqual(res.brand, 'brand X')
