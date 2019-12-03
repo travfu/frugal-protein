@@ -112,7 +112,7 @@ class Command(BaseCommand):
         rows = ProductInfo.objects.filter(**store_filter)
         rows = rows.filter(Q(description='') | 
                            Q(qty__isnull=True) |
-                           Q(protein__isnull=True))
+                           Q(protein__isnull=True)) # Q allows use of 'or'
         return rows
 
     
