@@ -94,13 +94,32 @@ class Command(BaseCommand):
         for store in stores[:1]:
             products = self.get_rows_for_info_scrape(store)
             for product in products[:1]:
+                # Store pids are stored in fields named after store
                 pid = getattr(product, store)
                 info_dict = scrape_infos(pid, store)
                 self.update_info_result(info_dict, product)
     
 
     def scrape_prices(self, stores=None):
-        pass
+        stores = stores or self.valid_stores
+        for store in stores:
+            products = self.get_rows_for_price_scrape(store)
+            for product in products[:1]:
+                # Store pids are stored in fields named after store
+                pid = getattr(product, store)
+                info_dict = scrape_infos(pid, store, price_only=True)
+                price_dict = info_dict['price_dict']
+                price_dict = self.prepend_dict_keys(price_dict, store)
+                self.update_price_result(price_dict, product)
+                
+
+    def prepend_dict_keys(self, price_dict, store):
+        """ Prepend dict keys with store name """
+        new_price_dict = {}
+        for k in price_dict:
+            new_price_dict[f'{store}_{k}'] = price_dict[k]
+        return new_price_dict
+
         
 
     def get_rows_for_info_scrape(self, store):
@@ -113,6 +132,18 @@ class Command(BaseCommand):
         rows = rows.filter(Q(description='') | 
                            Q(qty__isnull=True) |
                            Q(protein__isnull=True)) # Q allows use of 'or'
+        return rows
+    
+    def get_rows_for_price_scrape(self, store):
+        """ 
+        Returns queryset of products that have all required fields 
+        (i.e. no missing info values)
+        """
+        store_filter = {f'{store}__isnull': False}
+        rows = ProductInfo.objects.filter(**store_filter)
+        rows = rows.filter(Q(description__isnull=False) &
+                           Q(qty__isnull=False) &
+                           Q(protein__isnull=False))
         return rows
 
     
@@ -149,4 +180,8 @@ class Command(BaseCommand):
             return existing_brand[0]
         else:
             return Brands.objects.create(brand=brand)
-            
+    
+    def update_price_result(self, price_dict, product):
+        for k, v in price_dict.items():
+            setattr(product, k, v)
+        product.save()

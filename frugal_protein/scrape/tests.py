@@ -80,11 +80,11 @@ class TestRowFiltering(TestCase):
 
         # Act
         rows = self.command.get_rows_for_info_scrape('tesco')
-        row = [row.pid for row in rows]
+        rows = [row.pid for row in rows]
         e_res = [2]
 
         # Assert
-        self.assertEqual(row, e_res)
+        self.assertEqual(rows, e_res)
 
 
     def test_get_rows_for_info_scrape_OR_operator(self):
@@ -104,6 +104,26 @@ class TestRowFiltering(TestCase):
         rows = self.command.get_rows_for_info_scrape('tesco')
         rows = [row.pid for row in rows]
         e_res = [1, 2, 3]
+
+        self.assertEqual(rows, e_res)
+
+    def test_get_rows_for_price_scrape(self):
+        """ 
+        Should return rows that qualify for price scraping 
+        (i.e. has all info values)
+        """
+        # Qualifies for price scrape
+        ProductInfo.objects.create(
+            pid=1, tesco='1', **self.desc, **self.qty, **self.nutr
+        )
+        # Does not qualify for price scrape
+        ProductInfo.objects.create(
+            pid=2, tesco='2', **self.desc
+        )
+
+        rows = self.command.get_rows_for_price_scrape('tesco')
+        rows = [row.pid for row in rows]
+        e_res = [1]
 
         self.assertEqual(rows, e_res)
 
@@ -179,3 +199,86 @@ class TestScrapeInfo(TestCase):
         row_count = len(Brands.objects.filter(brand='brand X'))
         self.assertEqual(row_count, 1) # assert no new rows created
         self.assertEqual(res.brand, 'brand X')
+
+
+class TestScrapePrice(TestCase):
+    @patch('scrape.management.commands.scrape.scrape_infos')
+    @patch.object(Command, 'get_rows_for_price_scrape')
+    def test_scrape_price(self, mock_get_rows, mock_scrape_infos):
+        mock_product = ProductInfo.objects.create(pid=1, tesco=1)
+        mock_info_dict = {
+            'price_dict': {
+                'base_price': 1,
+                'sale_price': 1,
+                'offer_price': 1,
+                'offer_text': 'offer'
+            }
+        }
+        
+        mock_get_rows.return_value = [mock_product]
+        mock_scrape_infos.return_value = mock_info_dict
+        Command().scrape_prices(stores=['tesco'])
+
+        # Assert db object is updated with price data
+        res = ProductInfo.objects.get(pid=1)
+        self.assertEqual(res.tesco_base_price, 1)
+    
+    def test_prepend_dict_keys(self):
+        price_dict = {
+            'base_price': None, 
+            'sale_price': None, 
+            'offer_price': None, 
+            'offer_text': None
+        }
+        e_res = {
+            'tesco_base_price': None, 
+            'tesco_sale_price': None, 
+            'tesco_offer_price': None, 
+            'tesco_offer_text': None
+        }
+        res = Command().prepend_dict_keys(price_dict, 'tesco')
+        self.assertEqual(res, e_res)
+    
+
+    def test_update_price_result(self):
+        # Note that truncated rows (i.e. missing values) are used for testing
+        # but previous queryset filtering should have filtered out such 
+        # truncated rows for price scraping. 
+        product = ProductInfo.objects.create(pid=1, tesco=1)
+        price_dict = {
+            'tesco_base_price': 1, 
+            'tesco_sale_price': 2, 
+            'tesco_offer_price': 3, 
+            'tesco_offer_text': 'offer'
+        }
+
+        Command().update_price_result(price_dict, product)
+
+        res = ProductInfo.objects.get(pid=1)
+        self.assertEqual(res.tesco_base_price, 1)
+        self.assertEqual(res.tesco_sale_price, 2)
+        self.assertEqual(res.tesco_offer_price, 3)
+        self.assertEqual(res.tesco_offer_text, 'offer')
+    
+
+    def test_update_price_result_overwrites(self):
+        """ Existing price data should be overwritten """
+        product = ProductInfo.objects.create(pid=1, tesco=1,
+                                             tesco_base_price=1,
+                                             tesco_sale_price=2,
+                                             tesco_offer_price=3,
+                                             tesco_offer_text='offer')
+        price_dict = {
+            'tesco_base_price': 10, 
+            'tesco_sale_price': 11, 
+            'tesco_offer_price': 12, 
+            'tesco_offer_text': 'new offer'
+        }
+
+        Command().update_price_result(price_dict, product)
+
+        res = ProductInfo.objects.get(pid=1)
+        self.assertEqual(res.tesco_base_price, 10)
+        self.assertEqual(res.tesco_sale_price, 11)
+        self.assertEqual(res.tesco_offer_price, 12)
+        self.assertEqual(res.tesco_offer_text, 'new offer')
