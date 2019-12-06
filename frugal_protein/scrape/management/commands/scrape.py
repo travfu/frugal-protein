@@ -56,7 +56,6 @@ class Command(BaseCommand):
             help='The stores to scrape from'
         )
 
-
     def handle(self, *args, **options):
         scrape_type = options['type'][0]
         scrape_all = options['all']
@@ -80,15 +79,14 @@ class Command(BaseCommand):
             else:
                 self.scrape_prices(stores)
 
-
     def scrape_ids(self, stores=None):
         stores = stores or self.valid_stores
         for store in stores:
             for id_dicts in scrape_ids(store):
-                # save/update results
-                pass
+                for id_dict in id_dicts:
+                    if id_dict and id_dict.get('pid') is not None:
+                        self.update_id_result(id_dict, store)
     
-
     def scrape_infos(self, stores=None):
         stores = stores or self.valid_stores        
         for store in stores[:1]:
@@ -99,7 +97,6 @@ class Command(BaseCommand):
                 info_dict = scrape_infos(pid, store)
                 self.update_info_result(info_dict, product)
     
-
     def scrape_prices(self, stores=None):
         stores = stores or self.valid_stores
         for store in stores:
@@ -112,15 +109,12 @@ class Command(BaseCommand):
                 price_dict = self.prepend_dict_keys(price_dict, store)
                 self.update_price_result(price_dict, product)
                 
-
     def prepend_dict_keys(self, price_dict, store):
         """ Prepend dict keys with store name """
         new_price_dict = {}
         for k in price_dict:
             new_price_dict[f'{store}_{k}'] = price_dict[k]
         return new_price_dict
-
-        
 
     def get_rows_for_info_scrape(self, store):
         """ 
@@ -146,7 +140,6 @@ class Command(BaseCommand):
                            Q(protein__isnull=False))
         return rows
 
-    
     def update_info_result(self, info_dict, product):
         """ Updates row by replacing empty field values with scraped values """
         qty = info_dict.get('qty_dict')
@@ -185,3 +178,34 @@ class Command(BaseCommand):
         for k, v in price_dict.items():
             setattr(product, k, v)
         product.save()
+
+    def update_id_result(self, id_dict, store):
+        barcode = id_dict.get('barcode')
+        store_pid = id_dict.get('pid')
+
+        if not store_pid or not barcode and not store_pid:
+            return
+
+        # Rename id_dict 'pid' key to name of store to dynamically match 
+        # model field based on store name
+        id_dict[store] = id_dict.pop('pid')
+        
+        try:
+            product = ProductInfo.objects.get(Q(barcode=barcode) | 
+                                              Q(**{store:store_pid}))
+        except ProductInfo.DoesNotExist:
+            ProductInfo.objects.create(**id_dict)
+        except ProductInfo.MultipleObjectsReturned:
+            # If multiple objects returned, it means that there exists multiple
+            # products that share either the same barcode but not store pid or 
+            # vice versa. 
+            # For now, do nothing. 
+            pass
+        else:
+            store_field = getattr(product, store)
+            if product.barcode and not store_field:
+                setattr(product, store, store_pid)
+                product.save()
+            elif not product.barcode and store_field:
+                product.barcode = barcode
+                product.save()

@@ -282,3 +282,70 @@ class TestScrapePrice(TestCase):
         self.assertEqual(res.tesco_sale_price, 11)
         self.assertEqual(res.tesco_offer_price, 12)
         self.assertEqual(res.tesco_offer_text, 'new offer')
+
+
+class TestScrapeIds(TestCase):
+    @patch('scrape.management.commands.scrape.scrape_ids')
+    def test_scrape_ids(self, mock_scrape_ids):   
+        mock_id_dicts = [
+            # Mock of yield results
+            [{'barcode': '1', 'pid': '11'}, {'barcode': '2', 'pid': '22'}],
+            [{'barcode': '3', 'pid': '33'}, {'barcode': '4', 'pid': '44'}],
+            [{'barcode': '5', 'pid': '55'}, {'barcode': '6', 'pid': '66'}]
+        ]
+        mock_scrape_ids.return_value = mock_id_dicts
+
+        Command().scrape_ids(['tesco'])
+
+        res = ProductInfo.objects.all()
+        self.assertEqual(len(res), 6)
+
+    def test_update_id_result_case_1(self):
+        """ New product; should create new row """
+        id_dict = {'barcode': '1', 'pid': '100'}
+        Command().update_id_result(id_dict, 'tesco')
+
+        res = ProductInfo.objects.all()
+        self.assertEqual(len(res), 1)
+        self.assertEqual(res[0].barcode, '1')
+        self.assertEqual(res[0].tesco, '100')
+
+    def test_update_id_result_case_2(self):
+        """
+        Missing pid or both barcode/pid should not insert/update row
+        """
+        id_dict_1 = {'barcode': '1', 'pid': None}
+        id_dict_2 = {'barcode': None, 'pid': None}
+        Command().update_id_result(id_dict_1, 'tesco')
+        Command().update_id_result(id_dict_2, 'tesco')
+
+        res = ProductInfo.objects.all()
+        self.assertEqual(len(res), 0)
+
+    def test_update_id_result_case_3(self):
+        """ 
+        Existing product with identical barcode but no store_pid - 
+        should update existing row with new store_pid
+        """
+        ProductInfo.objects.create(barcode='1')
+        id_dict = {'barcode': '1', 'pid': '100'}
+        Command().update_id_result(id_dict, 'tesco')
+
+        res = ProductInfo.objects.all()
+        self.assertEqual(len(res), 1)
+        self.assertEqual(res[0].barcode, '1')
+        self.assertEqual(res[0].tesco, '100')
+
+    def test_update_id_result_case_4(self):
+        """
+        Existing product with identical store_pid but no barcode -
+        should update existing row with new barcode
+        """
+        ProductInfo.objects.create(tesco='100')
+        id_dict = {'barcode': '1', 'pid': '100'}
+        Command().update_id_result(id_dict, 'tesco')
+
+        res = ProductInfo.objects.all()
+        self.assertEqual(len(res), 1)
+        self.assertEqual(res[0].barcode, '1')
+        self.assertEqual(res[0].tesco, '100')
