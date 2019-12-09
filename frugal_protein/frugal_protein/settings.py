@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 import os
 import django_heroku
 
+import boto3
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -42,6 +44,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'storages'
 ]
 
 MIDDLEWARE = [
@@ -118,6 +122,24 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+MEDIA_URL = '/media/'
+
+
+
+# AWS Settings
+AWS_ACCESS_KEY_ID = 'AKIAZUJG62HSOST74D5S'
+AWS_SECRET_ACCESS_KEY = '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'
+AWS_STORAGE_BUCKET_NAME = 'frugal-protein'
+
+
+AWS_S3_REGION_NAME = 'eu-west-2'
+AWS_S3_SIGNATURE_VERSION = 's3v4'
+
+# Use AWS S3 for media files
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 
 try: 

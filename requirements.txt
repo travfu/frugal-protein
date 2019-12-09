@@ -3,6 +3,10 @@ psycopg2
 pyzbar
 Pillow
 
+# AWS S3
+boto3
+django-storages
+
 # For deploying on Heroku
 django-heroku
 gunicorn
