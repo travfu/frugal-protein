@@ -26,7 +26,7 @@ Design Restrictions:
 from django.core.management.base import BaseCommand
 from django.db.models import Q
 
-from frugal_protein_scrapers.scrapers import scrape_ids, scrape_infos
+import frugal_protein_scrapers as fps
 from products.models import Brands, ProductInfo
 
 
@@ -82,7 +82,7 @@ class Command(BaseCommand):
     def scrape_ids(self, stores=None):
         stores = stores or self.valid_stores
         for store in stores:
-            for id_dicts in scrape_ids(store):
+            for id_dicts in fps.scrape_ids(store):
                 for id_dict in id_dicts:
                     if id_dict and id_dict.get('pid') is not None:
                         self.update_id_result(id_dict, store)
@@ -94,7 +94,7 @@ class Command(BaseCommand):
             for product in products[:1]:
                 # Store pids are stored in fields named after store
                 pid = getattr(product, store)
-                info_dict = scrape_infos(pid, store)
+                info_dict = fps.scrape_infos(pid, store)
                 self.update_info_result(info_dict, product)
     
     def scrape_prices(self, stores=None):
@@ -104,7 +104,7 @@ class Command(BaseCommand):
             for product in products[:1]:
                 # Store pids are stored in fields named after store
                 pid = getattr(product, store)
-                info_dict = scrape_infos(pid, store, price_only=True)
+                info_dict = fps.scrape_infos(pid, store, price_only=True)
                 price_dict = info_dict['price_dict']
                 price_dict = self.prepend_dict_keys(price_dict, store)
                 self.update_price_result(price_dict, product)

@@ -202,7 +202,7 @@ class TestScrapeInfo(TestCase):
 
 
 class TestScrapePrice(TestCase):
-    @patch('scrape.management.commands.scrape.scrape_infos')
+    @patch('scrape.management.commands.scrape.fps.scrape_infos')
     @patch.object(Command, 'get_rows_for_price_scrape')
     def test_scrape_price(self, mock_get_rows, mock_scrape_infos):
         mock_product = ProductInfo.objects.create(pid=1, tesco=1)
@@ -285,7 +285,7 @@ class TestScrapePrice(TestCase):
 
 
 class TestScrapeIds(TestCase):
-    @patch('scrape.management.commands.scrape.scrape_ids')
+    @patch('scrape.management.commands.scrape.fps.scrape_ids')
     def test_scrape_ids(self, mock_scrape_ids):   
         mock_id_dicts = [
             # Mock of yield results
