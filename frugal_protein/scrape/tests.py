@@ -6,287 +6,72 @@ from django.test import TestCase
 
 from products.models import ProductInfo, Brands
 from scrape.management.commands.scrape import Command
+from scrape.management.commands._handlers import ScrapeHandler, STORES, Util
 
 
-class TestScrapeCommand(TestCase):
-    # Notes on call_command:
-    #   named args can be passed into call_command as kwargs but these kwargs 
-    #   are passed to the command without triggering the argument parser, and 
-    #   thus, may not undergo argument parser validations. Therefore, pass 
-    #   named args as positional args.
+class TestScrapeUtil(TestCase):
+    def test_valid_id_dict(self):
+        # Valid
+        case_1 = {'barcode': '123', 'pid': '234'}
+        case_2 = {'barcode': None, 'pid': '234'}
+        # Invalid
+        case_3 = {'barcode': '123', 'pid': None}
+        case_4 = {'barcode': None, 'pid': None}
 
-    def test_invalid_scrape_type(self):
-        """ Error should be raised if an invalid arg is passed in """
-        with self.assertRaises(CommandError):
-            call_command('scrape', 'invalid type')
-    
-    def test_mutual_exclusive_arguments(self):
-        """ Only one of two arguments (-a or -s) can be used for any command """
-        with self.assertRaises(CommandError):
-            call_command('scrape', 'id', '-a', '-s=tesco')
+        self.assertTrue(Util.valid_id_dict(case_1))
+        self.assertTrue(Util.valid_id_dict(case_2))
+        self.assertFalse(Util.valid_id_dict(case_3))
+        self.assertFalse(Util.valid_id_dict(case_4))
 
-    def test_invalid_store_option(self):
-        """ Error should be raised if unimplemented store is passed via -s """
-        with self.assertRaises(CommandError):
-            call_command('scrape', 'info', '-s=randomstore')
+    def test_get_brand_obj_new_brand(self):
+        """ If brand doesn't exist in db, insert new row and return it """
+        res = Util.get_brand_obj('brandA')
+        row = Brands.objects.all()
+        self.assertEqual(len(row), 1) # Assert new db insertion
+        self.assertEqual(row[0].brand, 'brandA')
 
-    def test_correct_handling_scrape_id(self):
-        """ Passing in 'id' arg should call scrape_ids method """
-        with patch.object(Command, 'scrape_ids') as mock_method:
-            call_command('scrape', 'id', '-a')
-            mock_method.assert_called_once()
+    def test_get_brand_obj_existing_brand(self):
+        """ If brand exists in db, return Brand obj """
+        brand = Brands(brand='brandA')
+        brand.save()
 
-    def test_correct_handling_scrape_info(self):
-        """ Passing in 'info' arg should call scrape_infos method """
-        with patch.object(Command, 'scrape_infos') as mock_method:
-            call_command('scrape', 'info', '-a')
-            mock_method.assert_called_once()
-    
-    def test_correct_handling_scrape_price(self):
-        """ Passing in 'price' arg should call scrape_prices method """
-        with patch.object(Command, 'scrape_prices') as mock_method:
-            call_command('scrape', 'price', '-a')
-            mock_method.assert_called_once()
+        row = Brands.objects.all()
+        self.assertEqual(len(row), 1) # Assert no new db insertion
+        self.assertEqual(row[0], brand)
 
- 
-class TestRowFiltering(TestCase):    
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-
-        cls.command = Command()
-
-        cls.desc = {'description': 'sample product'}
-        cls.qty = {'qty': 1, 
-                   'num_of_units': 1, 
-                   'total_qty': 1, 
-                   'unit_of_measurement': 'g'}
-        cls.nutr = {'header': 'per 100g', 
-                    'kcal': 1, 
-                    'fat': 1, 
-                    'carb': 1, 
-                    'protein': 1}
-
-    
-    def test_get_rows_for_info_scrape(self):
-        """ Should return rows that require info scraping """
-        # Arrange
-        ProductInfo.objects.create(
-            pid=1, tesco='1', **self.desc, **self.qty, **self.nutr
-        )
-        ProductInfo.objects.create(
-            pid=2, tesco='2', **self.desc
-        )
-
-        # Act
-        rows = self.command.get_rows_for_info_scrape('tesco')
-        rows = [row.pid for row in rows]
-        e_res = [2]
-
-        # Assert
-        self.assertEqual(rows, e_res)
-
-
-    def test_get_rows_for_info_scrape_OR_operator(self):
-        """ 
-        Should return rows that have missing description OR qty OR nutrition 
-        """
-        ProductInfo.objects.create(
-            pid=1, tesco='1', **self.desc, **self.qty
-        )
-        ProductInfo.objects.create(
-            pid=2, tesco='2', **self.desc, **self.nutr
-        )
-        ProductInfo.objects.create(
-            pid=3, tesco='3', **self.qty, **self.nutr
-        )
-
-        rows = self.command.get_rows_for_info_scrape('tesco')
-        rows = [row.pid for row in rows]
-        e_res = [1, 2, 3]
-
-        self.assertEqual(rows, e_res)
-
-    def test_get_rows_for_price_scrape(self):
-        """ 
-        Should return rows that qualify for price scraping 
-        (i.e. has all info values)
-        """
-        # Qualifies for price scrape
-        ProductInfo.objects.create(
-            pid=1, tesco='1', **self.desc, **self.qty, **self.nutr
-        )
-        # Does not qualify for price scrape
-        ProductInfo.objects.create(
-            pid=2, tesco='2', **self.desc
-        )
-
-        rows = self.command.get_rows_for_price_scrape('tesco')
-        rows = [row.pid for row in rows]
-        e_res = [1]
-
-        self.assertEqual(rows, e_res)
-
-class TestScrapeInfo(TestCase):
-    def test_update_info(self):
-        # Arrange - Insert product without any product info into db
-        product = ProductInfo.objects.create(pid=1, tesco='1')
-
-        # Act
-        info_dict = {'description': 'sample product',
-                    #  'brand': 'sample brand',
-                     'qty_dict': {'qty': 1, 
-                                  'num_of_units': 1, 
-                                  'total_qty': 1, 
-                                  'unit_of_measurement': 'g'},
-                     'nutrition_dict': {'header': 'per 100g', 
-                                        'kcal': 1, 
-                                        'fat': 1, 
-                                        'carb': 1, 
-                                        'protein': 1}}                    
-        Command().update_info_result(info_dict, product)
-
-        # Assert description and brand is updated
-        self.assertEqual(product.description, info_dict['description'])
-        
-        # Assert quantity is updated
-        qty = info_dict['qty_dict']
-        self.assertEqual(product.qty, qty['qty'])
-        self.assertEqual(product.num_of_units, qty['num_of_units'])
-        self.assertEqual(product.total_qty, qty['total_qty'])
-        self.assertEqual(product.num_of_units, qty['num_of_units'])
-        
-        # Assert nutrition is updated
-        nutrition = info_dict['nutrition_dict']
-        self.assertEqual(product.header, nutrition['header'])
-        self.assertEqual(product.kcal, nutrition['kcal'])
-        self.assertEqual(product.fat, nutrition['fat'])
-        self.assertEqual(product.carb, nutrition['carb'])
-        self.assertEqual(product.protein, nutrition['protein'])
-
-    def test_update_info_does_not_overwrite_existing(self):
-        """ Existing info should not be overwritten """
-        product = ProductInfo.objects.create(pid=1, tesco=1, description='x')
-        info_dict = {'description': 'sample product'}                    
-        Command().update_info_result(info_dict, product)
-        
-        # Assert description is not overwritten
-        self.assertEqual(product.description, 'x')
-
-    def test_update_info_brand(self):
-        """ Brand should be a reference (Foreign Key) to a brand object """
-        product = ProductInfo.objects.create(pid=1, tesco=1)
-        info_dict = {'brand': 'brand X'}
-        Command().update_info_result(info_dict, product)
-
-        e_res = Brands.objects.filter(brand=info_dict['brand'])
-        self.assertEqual(product.brand, e_res[0]) 
-
-    def test_get_brand_object_new_brand(self):
-        """ Should insert new brand to db and return as object """        
-        res = Command().get_brand_object('brand X')
-        row_count = len(Brands.objects.filter(brand='brand X'))
-        self.assertEqual(row_count, 1) # assert new row created
-        self.assertEqual(res.brand, 'brand X')
-
-    def test_get_brand_object_existing_brand(self):
-        """ 
-        Should not insert new brand but return brand object that already 
-        exists in db 
-        """
-        Brands.objects.create(brand='brand X')
-        res = Command().get_brand_object('brand X')
-        row_count = len(Brands.objects.filter(brand='brand X'))
-        self.assertEqual(row_count, 1) # assert no new rows created
-        self.assertEqual(res.brand, 'brand X')
-
-
-class TestScrapePrice(TestCase):
-    @patch('scrape.management.commands.scrape.fps.scrape_infos')
-    @patch.object(Command, 'get_rows_for_price_scrape')
-    def test_scrape_price(self, mock_get_rows, mock_scrape_infos):
-        mock_product = ProductInfo.objects.create(pid=1, tesco=1)
-        mock_info_dict = {
-            'price_dict': {
-                'base_price': 1,
-                'sale_price': 1,
-                'offer_price': 1,
-                'offer_text': 'offer'
-            }
-        }
-        
-        mock_get_rows.return_value = [mock_product]
-        mock_scrape_infos.return_value = mock_info_dict
-        Command().scrape_prices(stores=['tesco'])
-
-        # Assert db object is updated with price data
-        res = ProductInfo.objects.get(pid=1)
-        self.assertEqual(res.tesco_base_price, 1)
-    
     def test_prepend_dict_keys(self):
+        """ 
+        Should prepend store name to price dict keys to match model field 
+        """
         price_dict = {
-            'base_price': None, 
-            'sale_price': None, 
-            'offer_price': None, 
+            'base_price': None,
+            'sale_price': None,
+            'offer_price': None,
             'offer_text': None
         }
         e_res = {
-            'tesco_base_price': None, 
-            'tesco_sale_price': None, 
-            'tesco_offer_price': None, 
+            'tesco_base_price': None,
+            'tesco_sale_price': None,
+            'tesco_offer_price': None,
             'tesco_offer_text': None
         }
-        res = Command().prepend_dict_keys(price_dict, 'tesco')
+        res = Util.prepend_dict_keys(price_dict, 'tesco')
         self.assertEqual(res, e_res)
-    
-
-    def test_update_price_result(self):
-        # Note that truncated rows (i.e. missing values) are used for testing
-        # but previous queryset filtering should have filtered out such 
-        # truncated rows for price scraping. 
-        product = ProductInfo.objects.create(pid=1, tesco=1)
-        price_dict = {
-            'tesco_base_price': 1, 
-            'tesco_sale_price': 2, 
-            'tesco_offer_price': 3, 
-            'tesco_offer_text': 'offer'
-        }
-
-        Command().update_price_result(price_dict, product)
-
-        res = ProductInfo.objects.get(pid=1)
-        self.assertEqual(res.tesco_base_price, 1)
-        self.assertEqual(res.tesco_sale_price, 2)
-        self.assertEqual(res.tesco_offer_price, 3)
-        self.assertEqual(res.tesco_offer_text, 'offer')
-    
-
-    def test_update_price_result_overwrites(self):
-        """ Existing price data should be overwritten """
-        product = ProductInfo.objects.create(pid=1, tesco=1,
-                                             tesco_base_price=1,
-                                             tesco_sale_price=2,
-                                             tesco_offer_price=3,
-                                             tesco_offer_text='offer')
-        price_dict = {
-            'tesco_base_price': 10, 
-            'tesco_sale_price': 11, 
-            'tesco_offer_price': 12, 
-            'tesco_offer_text': 'new offer'
-        }
-
-        Command().update_price_result(price_dict, product)
-
-        res = ProductInfo.objects.get(pid=1)
-        self.assertEqual(res.tesco_base_price, 10)
-        self.assertEqual(res.tesco_sale_price, 11)
-        self.assertEqual(res.tesco_offer_price, 12)
-        self.assertEqual(res.tesco_offer_text, 'new offer')
 
 
 class TestScrapeIds(TestCase):
+    mock_options = {
+        'type': None,
+        'stores': None,
+        'live': False,
+        'exclusive': None,
+        'exclude': None
+    }
+    
+    
     @patch('scrape.management.commands.scrape.fps.scrape_ids')
-    def test_scrape_ids(self, mock_scrape_ids):   
+    def test_scrape_ids_integration(self, mock_scrape_ids): 
+        # Arrange
         mock_id_dicts = [
             # Mock of yield results
             [{'barcode': '1', 'pid': '11'}, {'barcode': '2', 'pid': '22'}],
@@ -295,57 +80,281 @@ class TestScrapeIds(TestCase):
         ]
         mock_scrape_ids.return_value = mock_id_dicts
 
-        Command().scrape_ids(['tesco'])
+        # Act
+        call_command('scrape', 'id', '-s=tesco')
 
+        # Assert
         res = ProductInfo.objects.all()
         self.assertEqual(len(res), 6)
 
-    def test_update_id_result_case_1(self):
-        """ New product; should create new row """
-        id_dict = {'barcode': '1', 'pid': '100'}
-        Command().update_id_result(id_dict, 'tesco')
 
+    def test_update_id_case_1(self):
+        """ New products should result in new db rows """
+        # Arrange
+        options = self.mock_options
+        options.update({'type': ['id']}) # manage.py scrape id
+        handler = ScrapeHandler(**options) 
+        new_product = {'barcode': '1', 'pid': '11'}
+
+        # Act
+        handler._update_ids(new_product, 'tesco')
+
+        # Assert
+        row = ProductInfo.objects.all()
+        self.assertEqual(len(row), 1)
+        self.assertEqual(row[0].barcode, '1')
+        self.assertEqual(row[0].tesco, '11')
+    
+    def test_update_id_case_2(self):
+        """ Existing products should be updated """
+        options = self.mock_options
+        options.update({'type': ['id']}) # manage.py scrape id
+        handler = ScrapeHandler(**options)
+
+        existing_product = {'barcode': '1', 'pid': '11'}
+        ProductInfo.objects.create(barcode=1)
+        
+        handler._update_ids(existing_product, 'tesco')
+
+        row = ProductInfo.objects.all()
+        self.assertEqual(len(row), 1)
+        self.assertEqual(row[0].barcode, '1')
+        self.assertEqual(row[0].tesco, '11')
+
+    def test_update_id_case_3(self):
+        """ If id_dict has no pid value, no db actions should be taken """
+        options = self.mock_options
+        options.update({'type': ['id']}) # manage.py scrape id
+        handler = ScrapeHandler(**options)
+
+        id_dict = {'barcode': '1', 'pid': None}
+        handler._update_ids(id_dict, 'tesco')
+
+        row = ProductInfo.objects.all()
+        self.assertEqual(len(row), 0)
+
+
+class TestScrapeInfo(TestCase):
+    mock_options = {
+        'type': None,
+        'stores': None,
+        'live': False,
+        'exclusive': None,
+        'exclude': None
+    }
+
+    mock_info_dict = {'description': 'b',
+                      'brand': Brands.objects.create(brand='brandB'),
+                      'qty':{'qty': 2,
+                             'num_of_units': 2,
+                             'total_qty': 2,
+                             'unit_of_measurement': 'b'},
+                      'nutrition': {'header': 'b',
+                                    'kcal': 2,
+                                    'fat': 2,
+                                    'carb': 2,
+                                    'protein': 2},
+                      'price': {'base_price': 2,
+                                'sale_price': 2,
+                                'offer_price': 2,
+                                'offer_text': 'b'}}
+
+
+    @patch('scrape.management.commands.scrape.fps.scrape_infos')
+    def test_scrape_info_integrations(self, mock_scrape_infos):
+        # Arrange (1)
+        mock_product = ProductInfo.objects.create(tesco='1')
+        with patch.object(ProductInfo, 'objects') as mock_ProductInfo_objects:
+            mock_ProductInfo_objects.filter.return_value = [mock_product]
+
+            mock_info_dict = self.mock_info_dict
+            mock_info_dict['brand'] = 'brandB'
+            mock_scrape_infos.return_value = mock_info_dict
+            
+            # Act
+            call_command('scrape', 'info', '-s=tesco')
+
+        # Assert
+        res = ProductInfo.objects.get(tesco='1')
+        self.assertEqual(res.description, 'b')
+        self.assertIsInstance(res.brand, Brands)
+        self.assertEqual(res.brand.brand, 'brandB')
+
+    def test_update_info_description(self):
+        product = ProductInfo.objects.create(tesco='1')
+
+        options = self.mock_options
+        options['type'] = 'info'
+        handler = ScrapeHandler(**options)
+        handler._update_infos({'description': 'x'}, product, 'tesco')
+
+        res = ProductInfo.objects.get(tesco=1)
+        self.assertEqual(res.description, 'x')
+
+    def test_update_info_brand(self):
+        product = ProductInfo.objects.create(tesco='1')
+        brand = Brands.objects.create(brand='brandX')
+
+        options = self.mock_options
+        options['type'] = 'info'
+        handler = ScrapeHandler(**options)
+        handler._update_infos({'brand': 'brandX'}, product, 'tesco')
+
+        res = ProductInfo.objects.get(tesco=1)
+        self.assertEqual(res.brand, brand)
+
+    def test_update_info_qty(self):
+        product = ProductInfo.objects.create(tesco='1')
+        qty = {'qty': self.mock_info_dict['qty']}
+
+        options = self.mock_options
+        options['type'] = 'info'
+        handler = ScrapeHandler(**options)
+        handler._update_infos(qty, product, 'tesco')
+
+        res = ProductInfo.objects.get(tesco=1)
+        self.assertEqual(res.qty, 2)
+        self.assertEqual(res.num_of_units, 2)
+        self.assertEqual(res.total_qty, 2)
+        self.assertEqual(res.unit_of_measurement, 'b')
+
+    def test_update_info_nutrition(self):
+        product = ProductInfo.objects.create(tesco='1')
+        nutrition = {'nutrition': self.mock_info_dict['nutrition']}
+
+        options = self.mock_options
+        options['type'] = 'info'
+        handler = ScrapeHandler(**options)
+        handler._update_infos(nutrition, product, 'tesco')
+        
+        res = ProductInfo.objects.get(tesco=1)
+        self.assertEqual(res.header, 'b')
+        self.assertEqual(res.kcal, 2)
+        self.assertEqual(res.fat, 2)
+        self.assertEqual(res.carb, 2)
+        self.assertEqual(res.protein, 2)
+
+    def test_update_info_price(self):
+        product = ProductInfo.objects.create(tesco='1')
+        price = {'price': self.mock_info_dict['price']}
+
+        options = self.mock_options
+        options['type'] = 'info'
+        handler = ScrapeHandler(**options)
+        handler._update_infos(price, product, 'tesco')
+        
+        res = ProductInfo.objects.get(tesco=1)
+        self.assertEqual(res.tesco_base_price, 2)
+        self.assertEqual(res.tesco_sale_price, 2)
+        self.assertEqual(res.tesco_offer_price, 2)
+        self.assertEqual(res.tesco_offer_text, 'b')
+
+    def test_update_info_does_not_overwrite_existing(self):
+        """ Existing info should not be overwritten """
+        # Arrange
+        product_1 = {'description': 'a',
+                     'brand': Brands.objects.create(brand='brandA'),
+                     'qty': 1,
+                     'num_of_units': 1,
+                     'total_qty': 1,
+                     'unit_of_measurement': 'a',
+                     'header': 'a',
+                     'kcal': 1,
+                     'fat': 1,
+                     'carb': 1,
+                     'protein': 1,
+                     'tesco_base_price': 1,
+                     'tesco_sale_price': 1,
+                     'tesco_offer_price': 1,
+                     'tesco_offer_text': 'a'}
+        
+        # Act
+        row = ProductInfo.objects.create(**product_1)
+        options = self.mock_options
+        options['type'] = 'info'
+        handler = ScrapeHandler(**options)
+        handler._update_infos(self.mock_info_dict, row, 'tesco')
+
+        # Assert
         res = ProductInfo.objects.all()
         self.assertEqual(len(res), 1)
-        self.assertEqual(res[0].barcode, '1')
-        self.assertEqual(res[0].tesco, '100')
+        self.assertEqual(res[0].description, 'a')
+        self.assertEqual(res[0].brand.brand, 'brandA')
+        self.assertEqual(res[0].qty, 1)
+        self.assertEqual(res[0].num_of_units, 1)
+        self.assertEqual(res[0].total_qty, 1)
+        self.assertEqual(res[0].unit_of_measurement, 'a')
+        self.assertEqual(res[0].header, 'a')
+        self.assertEqual(res[0].kcal, 1)
+        self.assertEqual(res[0].fat, 1)
+        self.assertEqual(res[0].carb, 1)
+        self.assertEqual(res[0].protein, 1)
+        self.assertEqual(res[0].tesco_base_price, 1)
+        self.assertEqual(res[0].tesco_sale_price, 1)
+        self.assertEqual(res[0].tesco_offer_price, 1)
+        self.assertEqual(res[0].tesco_offer_text, 'a')
 
-    def test_update_id_result_case_2(self):
+
+class TestLiveOption(TestCase):
+    databases = ['default', 'live']
+
+    mock_options = {
+        'type': None,
+        'stores': None,
+        'live': False,
+        'exclusive': None,
+        'exclude': None
+    }
+
+    def test_update_id_with_live_option(self):
         """
-        Missing pid or both barcode/pid should not insert/update row
+        If --live option is used, all database actions should be directed to
+        'live' db. Update function should update ID of existing product on 
+        the live db instead of default db.
         """
-        id_dict_1 = {'barcode': '1', 'pid': None}
-        id_dict_2 = {'barcode': None, 'pid': None}
-        Command().update_id_result(id_dict_1, 'tesco')
-        Command().update_id_result(id_dict_2, 'tesco')
+        # Arrange: 
+        # Instantiate ScrapeHandler with command options
+        options = self.mock_options
+        options.update({'type': ['id'],
+                        'live': True}) # manage.py scrape id -l
+        handler = ScrapeHandler(**options)
 
-        res = ProductInfo.objects.all()
-        self.assertEqual(len(res), 0)
+        # Insert identical product into default and live db
+        product = ProductInfo(barcode=None, tesco='1')
+        product.save() # Insert into default db
+        product.save(using='live') # Insert into live db
 
-    def test_update_id_result_case_3(self):
-        """ 
-        Existing product with identical barcode but no store_pid - 
-        should update existing row with new store_pid
+        # Act: update db, specifically, update barcode field on live db
+        handler._update_ids({'barcode': '11', 'pid': '1'}, 'tesco')
+
+        # Assert that barcode field has been updated on live but not default db
+        res_default = ProductInfo.objects.get(tesco='1')
+        res_live = ProductInfo.objects.using('live').get(tesco='1')
+        self.assertEqual(res_default.barcode, None)
+        self.assertEqual(res_live.barcode, '11')
+
+    def test_update_info_with_live_option(self):
         """
-        ProductInfo.objects.create(barcode='1')
-        id_dict = {'barcode': '1', 'pid': '100'}
-        Command().update_id_result(id_dict, 'tesco')
-
-        res = ProductInfo.objects.all()
-        self.assertEqual(len(res), 1)
-        self.assertEqual(res[0].barcode, '1')
-        self.assertEqual(res[0].tesco, '100')
-
-    def test_update_id_result_case_4(self):
+        If --live option is used, all database actions should be directed to
+        'live' db. Update function should update/insert product info on the live
+        db instead of default db.
         """
-        Existing product with identical store_pid but no barcode -
-        should update existing row with new barcode
-        """
-        ProductInfo.objects.create(tesco='100')
-        id_dict = {'barcode': '1', 'pid': '100'}
-        Command().update_id_result(id_dict, 'tesco')
+        options = self.mock_options
+        options.update({'type': ['info'],
+                        'live': True}) # manage.py scrape info -l
+        handler = ScrapeHandler(**options)
 
-        res = ProductInfo.objects.all()
-        self.assertEqual(len(res), 1)
-        self.assertEqual(res[0].barcode, '1')
-        self.assertEqual(res[0].tesco, '100')
+        product = ProductInfo(tesco='1', description='x')
+        product.save()
+        product.save(using='live')
+
+        handler._update_infos({'price':{'base_price': 11}}, product, 'tesco')
+
+        res_default = ProductInfo.objects.get(tesco='1')
+        res_live = ProductInfo.objects.using('live').get(tesco='1')
+        self.assertEqual(res_default.tesco_base_price, None)
+        self.assertEqual(res_live.tesco_base_price, 11)
+        
+
+    def test_a(self):
+        call_command('scrape', 'info', '-s=tesco', '-l')
