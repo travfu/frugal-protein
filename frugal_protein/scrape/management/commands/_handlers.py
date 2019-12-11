@@ -1,16 +1,22 @@
 """
 Collection of functions to implement the scrape command
 """
-from datetime import date
+import logging
 import os
+from datetime import date
 
 from django.core.management.base import CommandError
 from django.db.models import Q
 
 import frugal_protein_scrapers as fps
-from products.models import ProductInfo, Brands
 from frugal_protein import settings
+from products.models import ProductInfo, Brands
 
+
+# Setup logging
+filename = f'{date.today()}_infoscrape.log'
+filepath = os.path.join(settings.BASE_DIR, 'scrape', 'logs', filename)
+logging.basicConfig(filename=filepath,level=logging.INFO)
 
 # Lists all stores that is currently supported (i.e. stores that can be scraped)
 STORES = frozenset(['tesco', 'iceland'])
@@ -88,12 +94,13 @@ class ScrapeHandler:
                 products = ProductInfo.objects.filter(**store_filter)
             for product in products:
                 pid = getattr(product, store)
-                info_dict = fps.scrape_infos(pid, store, 
-                                            exclusive=self.exclusive, 
-                                            exclude=self.exclude)
-                self._update_infos(info_dict, product, store)
-                
-        
+                try:
+                    info_dict = fps.scrape_infos(pid, store, 
+                                                exclusive=self.exclusive, 
+                                                exclude=self.exclude)
+                    # self._update_infos(info_dict, product, store)
+                except Exception as e:
+                    logging.info(f'{store}({pid}) -- {e}')
 
 
     def _update_ids(self, id_dict, store):
