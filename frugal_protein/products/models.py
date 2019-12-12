@@ -40,6 +40,8 @@ class ProductInfo(models.Model):
     iceland_offer_price = models.DecimalField(max_digits=6, decimal_places=2, null=True)
     iceland_offer_text = models.CharField(max_length=255, null=True)
 
+    # Image
+    img = models.ImageField(default='/product_images/default.png', upload_to='product_images')
 
     def price_table(self):
         """ Returns a nested dict of prices for price table in product page """
