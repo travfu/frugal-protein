@@ -48,7 +48,7 @@
             {% for product in products %}            
                 <li>
                     <a href=/product/{{ product.pid }} class="result">
-                        <img src="https://dummyimage.com/200x200/c2c2c2/757575&text=No+image" alt="{{ product.description|title }}">
+                        <img src="{{ product.img.url }}" alt="{{ product.description|title }}">
                         <span>{{ product.description|title }}</span>
                     </a>
                 </li>
