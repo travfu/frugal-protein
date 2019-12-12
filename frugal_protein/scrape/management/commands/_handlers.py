@@ -1,10 +1,14 @@
 """
 Collection of functions to implement the scrape command
 """
+import io
 import logging
 import os
 from datetime import date
 
+import boto3
+
+from django.core.files import File
 from django.core.management.base import CommandError
 from django.db.models import Q
 
@@ -57,6 +61,30 @@ class Util:
         for k in price_dict:
             new_price_dict[f'{store}_{k}'] = price_dict[k]
         return new_price_dict
+
+    @staticmethod
+    def save_local_img(Image, filename):
+        """ Save an Image file to local media directory and return path """
+        path = os.path.join(settings.MEDIA_ROOT, 'product_images', filename)
+        Image.save(path, formate='JPEG', quality=95)
+        return path
+    
+    @staticmethod
+    def upload_to_s3(filename):
+        """ Upload media file to S3 bucket """
+        s3 = boto3.client(
+            's3',
+            aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+            aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
+        )
+        path = os.path.join(settings.BASE_DIR, 'media', 'product_images', 
+                            filename)
+        bucket = os.getenv('AWS_STORAGE_BUCKET_NAME')
+        destination = f'product_images/{filename}'
+        try:
+            s3.upload_file(path, bucket, destination)
+        except Exception as e:
+            raise Exception(e)
 
 
 class ScrapeHandler:
@@ -182,5 +210,12 @@ class ScrapeHandler:
             
             for k, v in price_dict.items():
                 setattr(p, k, v)
+        
+        # image: save (if local) and upload to s3
+        if (p.img.name.endswith('default.png') or not p.img) and i.get('img'):
+            filename = f'{p.pid}.jpg'
+            path = self.util.save_local_img(i['img'], filename)
+            self.util.upload_to_s3(filename)
+            p.img = path
 
         p.save()
