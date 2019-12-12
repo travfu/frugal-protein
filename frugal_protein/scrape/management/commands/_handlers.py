@@ -98,7 +98,7 @@ class ScrapeHandler:
                     info_dict = fps.scrape_infos(pid, store, 
                                                 exclusive=self.exclusive, 
                                                 exclude=self.exclude)
-                    # self._update_infos(info_dict, product, store)
+                    self._update_infos(info_dict, product, store)
                 except Exception as e:
                     logging.info(f'{store}({pid}) -- {e}')
 
