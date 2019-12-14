@@ -67,7 +67,7 @@ class Util:
         """ Save an Image file to local media directory and return path """
         path = os.path.join(settings.MEDIA_ROOT, 'product_images', filename)
         Image.save(path, formate='JPEG', quality=95)
-        return path
+        return 
     
     @staticmethod
     def upload_to_s3(filename):
@@ -120,7 +120,7 @@ class ScrapeHandler:
                 products = ProductInfo.objects.using('live').filter(**store_filter)
             else:
                 products = ProductInfo.objects.filter(**store_filter)
-            for product in products:
+            for product in products[:1]:
                 pid = getattr(product, store)
                 try:
                     info_dict = fps.scrape_infos(pid, store, 
@@ -214,8 +214,10 @@ class ScrapeHandler:
         # image: save (if local) and upload to s3
         if (p.img.name.endswith('default.png') or not p.img) and i.get('img'):
             filename = f'{p.pid}.jpg'
-            path = self.util.save_local_img(i['img'], filename)
+            self.util.save_local_img(i['img'], filename)
             self.util.upload_to_s3(filename)
-            p.img = path
+
+            media_path = f'/product_images/{filename}'
+            p.img = media_path
 
         p.save()
