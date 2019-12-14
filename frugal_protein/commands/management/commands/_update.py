@@ -128,7 +128,7 @@ class UpdateHeroku:
     def via_pg_restore(self):
         self.reset_heroku_db()
         filename = f'{date.today()}.dump'
-        path = os.path.join(settings.BASE_DIR, 'scrape', 'db_dumps', filename)
+        path = os.path.join(settings.BASE_DIR, 'commands', 'db_dumps', filename)
         local_db = settings.DATABASES['live']['NAME']
         self.dump_local(local_db, path)
         while not os.path.isfile(path):

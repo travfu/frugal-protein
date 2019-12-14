@@ -19,7 +19,7 @@ from products.models import ProductInfo, Brands
 
 # Setup logging
 filename = f'{date.today()}_infoscrape.log'
-filepath = os.path.join(settings.BASE_DIR, 'scrape', 'logs', filename)
+filepath = os.path.join(settings.BASE_DIR, 'commands', 'logs', filename)
 logging.basicConfig(filename=filepath,level=logging.INFO)
 
 # Lists all stores that is currently supported (i.e. stores that can be scraped)
