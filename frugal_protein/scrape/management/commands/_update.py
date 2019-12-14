@@ -3,19 +3,10 @@ import re
 import subprocess
 from datetime import date
 
-from django.core.management import call_command
+from django.core.management import call_command, CommandError
 
 from frugal_protein import settings
 from products.models import Brands, ProductInfo
-
-
-def run_win_cmd(self, cmd):
-        process =  subprocess.Popen(cmd,
-                                    shell=True,
-                                    stdin=subprocess.PIPE,
-                                    stdout=subprocess.PIPE,
-                                    stderr=subprocess.PIPE)
-        return process
 
 
 class UpdateLiveDB:
@@ -33,9 +24,8 @@ class UpdateLiveDB:
     """
 
     max_rows = 9500
-    protein_threshold = 70  # per 100g/ml
+    protein_threshold = 10  # per 100g/ml
     live_db = 'live'
-    run_win_cmd = run_win_cmd
     
     def execute(self):
         self.reset_tables()
@@ -62,71 +52,106 @@ class UpdateLiveDB:
                 brand.save(using=self.live_db)
             for product in products:
                 product.save(using=self.live_db)
-            print(f'{total_rows} inserted into local heroku db')
+            print(f'{total_rows} rows inserted into local heroku db.',
+                  f'{len(products)} products and {len(brands)} brands')
         else:
             msg = f'Too many rows! {total_rows}/{self.max_rows}'
             print(msg)
     
     def reset_tables(self):
         """ Reset (truncate) productinfo and brands table """
-        # psql_user = os.getenv('PSQL_USER')
-        # psql_pass = str.encode(os.getenv('PSQL_PW'))
-        
-        # # Enter psql shell
-        # cmd = f'psql -U {psql_user}'
-        # process = self.run_win_cmd(cmd)
-        # process.stdin.write(psql_pass)
-
-        # # Connect to local live db
-        # connect_cmd = b'\c frugal_protein_local;'
-        # process.stdin.write(connect_cmd)
-        
-        # tables = ['products_brands', 'products_productinfo']
-        # truncate_cmd = f"TRUNCATE TABLE {', '.join(tables)};"
-        # process.stdin.write(truncate_cmd)
         call_command('flush', '--database=live', '--noinput')
         while len(ProductInfo.objects.using('live').all()) == 0 and \
               len(Brands.objects.using('live').all()) == 0:
               return
 
+    def run_win_cmd(self, cmd):
+        process =  subprocess.Popen(cmd,
+                                    shell=True,
+                                    stdin=subprocess.PIPE,
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE)
+        return process
+
 
 class UpdateHeroku:
-    """ Manually update psql on Heroku's servers via pg_dump and pg_restore """
-    # pg_dump & pg_restore is used instead of 'heroku pg:push' because I can't 
-    # get this pg:push to work on windows (problem relating to PGUSER=root 
-    # password prompt)
-    run_win_cmd = run_win_cmd
-
+    """
+    Two methods for updating psql db on Heroku:
+        1. Heroku CLI provides a method 'pg:push' to push a local db to a Heroku
+           db. Note that on Windows OS, this requires changing the PGUSER env
+           variable from ROOT to a psql user.
+        2. Manual push via pg_dump and pg_restore.
+    """
 
     def execute(self):
-        filename = f'{date.today()}3.dump'
-        path = os.path.join(settings.BASE_DIR, 'scrape', 'db_dumps', filename)
-        local_livedb = settings.DATABASES['live']['NAME']
-        self.dump_local(local_livedb, path)
+        self.via_heroku_cli()
+        # self.via_pg_restore()
+    
 
+    def run_win_cmd(self, cmd, **kwargs):
+        process =  subprocess.Popen(cmd,
+                                    shell=True,
+                                    stdin=subprocess.PIPE,
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE,
+                                    **kwargs)
+        return process
+
+
+    def via_heroku_cli(self):
+        """ Push local live db to remote heroku db via heroku's CLI """
+        # Note: On Windows OS, pg:push requires changing PGUSER=ROOT to 
+        # PGUSER={pguser} in the environment variables.
+        # TODO validate successful push
+        self.reset_heroku_db()
+        local_db = settings.DATABASES['live']['NAME']
+        heroku_db = os.getenv('HEROKU_DB_NAME')
+        app = 'frugal-protein'
+        cmd = f'heroku pg:push {local_db} {heroku_db} -a {app}'
+
+        # PGUSER & PGPASSWORD variables set in virtual environment variables, 
+        # thus must be collected and passed to subprocess
+        env = os.environ
+        p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, 
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                             env=env)
+        stdout, stderr = p.communicate()
+        
+        stdout = stdout.decode('utf-8')
+        if 'Pushing complete' in stdout:
+            print('local db successfully pushed to heroku db')
+        else:
+            stderr = stderr.decode('utf-8')
+            raise CommandError(stderr)
+
+
+    def via_pg_restore(self):
+        self.reset_heroku_db()
+        filename = f'{date.today()}.dump'
+        path = os.path.join(settings.BASE_DIR, 'scrape', 'db_dumps', filename)
+        local_db = settings.DATABASES['live']['NAME']
+        self.dump_local(local_db, path)
         while not os.path.isfile(path):
             # Wait until local dump file has completed saving
             pass
-
         db_config = self.get_db_config()
         self.restore_heroku(db_config, path)
     
 
-    # def run_win_cmd(self, cmd):
-    #     return subprocess.Popen(cmd,
-    #                             shell=True,
-    #                             stdin=subprocess.PIPE,
-    #                             stdout=subprocess.PIPE,
-    #                             stderr=subprocess.PIPE)
+    def reset_heroku_db(self):
+        cmd = 'heroku pg:reset DATABASE --confirm frugal-protein'
+        p = subprocess.run(cmd, capture_output=True, text=True, shell=True)
+        print('heroku db resetted')
+
 
     def dump_local(self, db_name, filename):
-        psql_user = os.getenv('PSQL_USER')
-        psql_pass = str.encode(os.getenv('PSQL_PW'))  # str > bytes
-        cmd = f'pg_dump --verbose -F c -Z 0 -U {psql_user} -h localhost -p 5432 {db_name} > {filename}'
-        print(cmd)
-        process = self.run_win_cmd(cmd)
-        process.stdin.write(psql_pass)
-        process.stdin.flush()
+        pguser = os.getenv('PGUSER')
+        cmd = f'pg_dump --no-password --verbose -F c -Z 0 -U {pguser} -h localhost -p 5432 {db_name} > {filename}'
+        env = os.environ
+        p = self.run_win_cmd(cmd, env=env)
+        p.communicate()
+        print('pg_dump executed')
+
 
     def get_db_config(self):
         # pattern: postgres://<username>:<password>@<hostname>:<port>/<db_name>
@@ -146,6 +171,7 @@ class UpdateHeroku:
             return config
         raise ValueError('Error retrieving db config')
 
+
     def restore_heroku(self, db_config, filename):
         user = db_config['username']
         pw = db_config['password']
@@ -153,5 +179,9 @@ class UpdateHeroku:
         port = db_config['port']
         db = db_config['db_name']
         cmd = f'pg_restore --verbose --no-acl --no-owner -U {user} -h {host} -p {port} -d {db} < {filename}'
-        process = self.run_win_cmd(cmd)
-        process.stdin.write(pw)
+        
+        env = os.environ
+        os.environ['PGPASSWORD'] = pw
+        p = self.run_win_cmd(cmd, env=env)
+        p.communicate()
+        print('pg_restore executed')
