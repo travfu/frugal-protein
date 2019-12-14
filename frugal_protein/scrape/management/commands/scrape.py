@@ -47,7 +47,7 @@ from django.db.models import Q
 
 import frugal_protein_scrapers as fps
 from products.models import Brands, ProductInfo
-from ._handlers import ScrapeHandler, STORES
+from ._scrape import ScrapeHandler, STORES
 
 
 
