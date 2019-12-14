@@ -138,8 +138,6 @@ AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
 AWS_S3_REGION_NAME = 'eu-west-2'
 AWS_S3_SIGNATURE_VERSION = 's3v4'
 
-# Use AWS S3 for media files
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 
 try: 
@@ -148,3 +146,6 @@ try:
 except ImportError:
     # Activate Django-Heroku to use Heroku settings
     django_heroku.settings(locals())
+
+    # Use AWS S3 for media files if not in local development environment
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
