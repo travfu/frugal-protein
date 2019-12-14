@@ -5,8 +5,8 @@ from django.core.management.base import CommandError
 from django.test import TestCase
 
 from products.models import ProductInfo, Brands
-from scrape.management.commands.scrape import Command
-from scrape.management.commands._scrape import ScrapeHandler, STORES, Util
+from commands.management.commands.scrape import Command
+from commands.management.commands._scrape import ScrapeHandler, STORES, Util
 
 
 class TestScrapeUtil(TestCase):
@@ -69,7 +69,7 @@ class TestScrapeIds(TestCase):
     }
     
     
-    @patch('scrape.management.commands.scrape.fps.scrape_ids')
+    @patch('commands.management.commands.scrape.fps.scrape_ids')
     def test_scrape_ids_integration(self, mock_scrape_ids): 
         # Arrange
         mock_id_dicts = [
@@ -160,7 +160,7 @@ class TestScrapeInfo(TestCase):
                                 'offer_text': 'b'}}
 
 
-    @patch('scrape.management.commands.scrape.fps.scrape_infos')
+    @patch('commands.management.commands.scrape.fps.scrape_infos')
     def test_scrape_info_integrations(self, mock_scrape_infos):
         # Arrange (1)
         mock_product = ProductInfo.objects.create(tesco='1')
