@@ -36,7 +36,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'products.apps.ProductsConfig',
     'calculator.apps.CalculatorConfig',
-    'scrape.apps.ScrapeConfig',
+    'commands.apps.CommandsConfig',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -144,6 +144,8 @@ try:
     # Use local settings
     from .local_settings import *
 except ImportError:
+    INSTALLED_APPS.remove('commands.apps.CommandsConfig')
+
     # Activate Django-Heroku to use Heroku settings
     django_heroku.settings(locals())
 

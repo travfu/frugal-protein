@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from scrape.management.commands._update import UpdateLiveDB, UpdateHeroku
+from commands.management.commands._update import UpdateLiveDB, UpdateHeroku
 
 
 class Command(BaseCommand):
