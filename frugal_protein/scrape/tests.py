@@ -6,7 +6,7 @@ from django.test import TestCase
 
 from products.models import ProductInfo, Brands
 from scrape.management.commands.scrape import Command
-from scrape.management.commands._handlers import ScrapeHandler, STORES, Util
+from scrape.management.commands._scrape import ScrapeHandler, STORES, Util
 
 
 class TestScrapeUtil(TestCase):
