@@ -1,6 +1,7 @@
 from django.test import TestCase
 
 from .helper.price_calc import Calc
+from .templatetags import products_filters as filters
 
 class TestCalculations(TestCase):
     calc = Calc()
@@ -59,3 +60,42 @@ class TestCalculations(TestCase):
         self.assertIsNone(res_2)
         self.assertIsNone(res_3)
         self.assertIsNone(res_4)
+
+
+class TestFilters(TestCase):
+    def test_formatprice_case_1(self):
+        res = filters.formatprice(10)
+        self.assertEqual(res, '£10.00')
+
+    def test_formatprice_case_2(self):
+        res = filters.formatprice(10.5)
+        self.assertEqual(res, '£10.50')
+
+    def test_formatprice_case_3(self):
+        res = filters.formatprice('10.75')
+        self.assertEqual(res, '£10.75')
+
+    def test_formatprice_case_4(self):
+        res = filters.formatprice('word')
+        self.assertEqual(res, 'word')
+
+    def test_formatprice_case_4(self):
+        res = filters.formatprice(None)
+        self.assertEqual(res, '')
+
+    def test_formatuom_case_1(self):
+        res = filters.formatuom('sngl')
+        self.assertEqual(res, 'item')
+
+    def test_formatuom_case_2(self):
+        res = filters.formatuom('l')
+        self.assertEqual(res, 'litre')
+
+    def test_formatuom_case_3(self):
+        res = filters.formatuom(None)
+        self.assertEqual(res, None)
+
+    def test_formatuom_case_4(self):
+        """ Should be case-insensitive to input arg """
+        res = filters.formatuom('SNGL')
+        self.assertEqual(res, 'item')

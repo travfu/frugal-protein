@@ -9,12 +9,16 @@ def formatprice(value):
     Formats value to add pound symbol prefix,
     but if value is string, return string
     """
-    if value is not None:
-        if type(value) == str:
-            return value
-        else:            
-            return '£' + f'{value:.2f}'
-    return ''
+    try:
+        price = float(value)
+    except ValueError:
+        # str but not a price value (i.e. contains char not accepted by float())
+        return value
+    except TypeError:
+        # If not string/int/float, return empty string
+        return ''
+    else:
+        return '£' + f'{price:.2f}'
 
 @register.filter
 def formatuom(value):
@@ -23,10 +27,10 @@ def formatuom(value):
         'sngl': 'item',
         'l': 'litre'
     }
-    
-    value = value.lower()
-    if any(value == option for option in options):
-        return options[value]
+    if value:
+        value = value.lower()
+        if value in options:
+            return options[value]
     else:
         return value
 
