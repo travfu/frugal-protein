@@ -31,8 +31,7 @@ def formatuom(value):
         value = value.lower()
         if value in options:
             return options[value]
-    else:
-        return value
+    return value
 
 @register.filter
 def format_querystring(query_dict):

@@ -34,17 +34,25 @@ class TestCalculations(TestCase):
         e_res = 1
         self.assertEqual(res, e_res)
 
-
     def test_price_per_protein_case_1(self):
         price_per_unit = 10  # per kg/litre/unit
-        protein = 25
+        protein = 25  # 25g protein per 100g
         qty = 100
         uom = 'g'
         
         res = Calc.price_per_protein(price_per_unit, protein, qty, uom)
         self.assertEqual(str(res), '0.04')
 
-    def test_unit_price_case_1(self):
+    def test_price_per_protein_case_2(self):
+        price_per_unit = 10  # per kg/litre/unit
+        protein = 25  # 25g protein per 1kg
+        qty = 1
+        uom = 'kg'
+        
+        res = Calc.price_per_protein(price_per_unit, protein, qty, uom)
+        self.assertEqual(str(res), '0.4')
+
+    def test_unit_price(self):
         price = 10
         total_qty = 100
         res = Calc.unit_price(price, total_qty)
@@ -99,3 +107,7 @@ class TestFilters(TestCase):
         """ Should be case-insensitive to input arg """
         res = filters.formatuom('SNGL')
         self.assertEqual(res, 'item')
+
+    def test_formatuom_case_5(self):
+        res = filters.formatuom('kg')
+        self.assertEqual(res, 'kg')
