@@ -45,8 +45,8 @@ class ProductInfo(models.Model):
 
     def price_table(self):
         """ Returns a nested dict of prices for price table in product page """
-        # Check if value exists for qty and nutrition
-        if self.total_qty is None or self.protein is None:
+        # Check if value exists for qty and nutrition 
+        if not self.total_qty or not self.protein:
             return None
         
         # Get list of stores within this model class
