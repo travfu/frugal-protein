@@ -1,39 +1,61 @@
-def calc_price_per_qty(price, total_qty):
-    """
-    Returns price per 'kg', 'litre', or 'unit/SNGL' depending on unit of measure.
+from decimal import Decimal
 
-    Args:
-        param1 (Decimal): price value
-        param2 (Decimal): total quantity of product (e.g. 200 [kg] or 1.5 [L])
-    """
-    if price is not None:
-        return price / total_qty
-    else:
-        return None
+class Calc:    
+    @classmethod
+    def unit_price(cls, price, total_qty):
+        """
+        Returns price per 'kg', 'litre', or 'unit/SNGL' depending on unit of measure.
+
+        Args:
+            param1 (Decimal): price value
+            param2 (Decimal): total quantity of product (e.g. 200 [kg] or 1.5 [L])
+        """
+        if price and total_qty:
+            return price / total_qty
+        else:
+            return None
 
 
-def calc_price_per_protein(price_qty, protein, uom):
-    """
-    Returns price per 10g protein.
-    Returns None if unit of measurement is 'SNGL'.
+    @classmethod
+    def price_per_protein(cls, price_per_unit, protein, qty, uom):
+        """ 
+        Calculates and returns price per 1g of protein 
 
-    Args:
-        param1 (Decimal): price per kg/litre/item(SNGL)
-        param2 (Decimal): protein content per 100g
-        param3 (str): unit of measurement
+        Args:
+            param1 (float): price per standard unit (1kg, 1litre, or 1unit)
+            param2 (float): protein content per 'qty' (param3)
+            param3 (float): see param2
+            param4 (str): unit of measurement (e.g. g, kg, ml, l, SNGL)
 
-    Equation = PricePerKg * (10g / ProteinPerKg)
-        PricePerKg == param1
-        ProteinPerKg == param2 * 10 (if unit of measure is kg/litre)
-    
-    TODO: implement equation if unit of measure is SNGL after sorting
-          out logic for parsing nutritional info for SNGL products. 
-          For now, return None
-    """
-    if uom == 'SNGL':
-        return None
-    elif protein is not None and protein != 0 and price_qty is not None:
-        multiplier = 10 / (protein * 10)   
-        return price_qty * multiplier
-    else:
-        return None
+        Equation:
+            price per 1g protein = price per unit / protein per unit
+            protein per unit = protein * multiplier
+            multiplier = 1 / qty (converted to standard unit)
+        """
+        print('========', price_per_unit, protein, qty, uom)
+        
+        multiplier = cls.std_unit_multiplier(cls, qty, uom)
+        protein_per_unit = protein * multiplier
+        return price_per_unit / protein_per_unit
+
+
+    def std_unit_multiplier(self, qty, uom):
+        """ 
+        Given a qty value and it's unit of measurement, return multiplier value
+        to standardise qty value to either 1kg, 1L, or 1unit (SNGL)
+
+        Example:
+             100g * x = 1kg
+            0.1kg * x = 1kg
+                    x = 1 / 0.1
+
+               3L * x = 1L
+                    x = 1 / 3
+        """
+        uom = uom.lower()
+        if uom in ('g', 'ml'):
+            unit_multiplier = 0.001  #  g * multiplier = kg
+        elif uom in ('kg', 'l', 'sngl'):
+            unit_multiplier = 1      # kg * multiplier = kg
+        return Decimal(1 / (qty * unit_multiplier))
+
