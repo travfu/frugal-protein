@@ -34,16 +34,16 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'products.apps.ProductsConfig',
-    'calculator.apps.CalculatorConfig',
-    'commands.apps.CommandsConfig',
-
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
+    'products.apps.ProductsConfig',
+    'calculator.apps.CalculatorConfig',
+    'commands.apps.CommandsConfig',
 
     'storages'
 ]
