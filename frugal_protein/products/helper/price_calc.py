@@ -31,9 +31,7 @@ class Calc:
             price per 1g protein = price per unit / protein per unit
             protein per unit = protein * multiplier
             multiplier = 1 / qty (converted to standard unit)
-        """
-        print('========', price_per_unit, protein, qty, uom)
-        
+        """        
         multiplier = cls.std_unit_multiplier(cls, qty, uom)
         protein_per_unit = protein * multiplier
         return price_per_unit / protein_per_unit
