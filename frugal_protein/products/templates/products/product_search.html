@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="{% static "products/css/navbar.css"%}">
     
     <script src="{% static "products/js/responsive_navbar.js" %}"></script>
+    <script src="{% static "products/js/product_search.js" %}"></script>
 {% endblock header %}
     
 {% block content %}
@@ -20,7 +21,7 @@
         </div>
     </div>
     
-    <form action="">
+    <form action="" id="form">
         <div class="csrf">{% csrf_token %}</div>
         <div class="form-search">
             {{ form.search }}
@@ -38,7 +39,7 @@
             <div>Filter by:</div>
             {{ form.brand }}
             {{ form.store }}
-            <div class="reset-btn">↺ Reset</div>
+            <div class="reset-btn" id="btn-reset">↺ Reset</div>
         </div>
         <div class="form-query">Showing Results for "{{ form.search.initial }}"</div>
     </form>
