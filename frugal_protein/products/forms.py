@@ -61,7 +61,8 @@ class ProductSearchForm(forms.Form):
 
     def get_brand_choices(self, search_query):
         """ Returns brands associated with products returned by search query """
-        brands = Brands.objects.filter(productinfo__description__icontains=search_query)
+        brands = Brands.objects.filter(
+            productinfo__description__search=search_query)
         brands = brands.distinct().order_by('brand')
 
         choice_tuples = [(brand.brand_id, brand.brand.title()) for brand in brands]

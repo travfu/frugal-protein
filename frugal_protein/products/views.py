@@ -70,14 +70,12 @@ class SearchView(FormMixin, ListView):
 
         queryset = []
         if search_query: 
-            queryset = m.ProductInfo.objects.filter(description__icontains=search_query).order_by('description')
-        
-            if brand_query:
-                if brand_query == '0':
-                    # 0 value is assigned to 'all brands'
-                    pass
-                else:
-                    queryset = queryset.filter(brand_id=brand_query)
+            # the '__search' in filter() requires django.contrib.postgres
+            queryset = m.ProductInfo.objects.filter(
+                description__search=search_query).order_by('description')
+            if brand_query and brand_query != '0':
+                # brand_query value of '0' corresponds to 'all brands'
+                queryset = queryset.filter(brand_id=brand_query)
             if store_query and store_query != 'all':
                 kwarg = {store_query + '__isnull': False}
                 queryset = queryset.filter(**kwarg)
