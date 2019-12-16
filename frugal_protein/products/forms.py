@@ -68,7 +68,7 @@ class ProductSearchForm(forms.Form):
             productinfo__description__search=search_query)
         brands = brands.distinct().order_by('brand')
 
-        choice_tuples = [(b.brand_id, b.brand.title()) for brand in brands]
+        choice_tuples = [(b.brand_id, b.brand.title()) for b in brands]
         if choice_tuples:
             brand_count_str = str(len(choice_tuples))
             # Assign value '0' for 'all brands'
