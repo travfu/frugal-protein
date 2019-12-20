@@ -97,3 +97,22 @@ class Barcode(forms.Form):
             }
         )
     )
+
+
+class ProductBrowserForm(forms.Form):
+    search = forms.CharField(
+        max_length = 255,
+        widget = forms.TextInput({
+            'class': 'form_field',
+            'placeholder': 'search',
+        })
+    )
+
+    store = forms.ChoiceField(
+        choices = [('tesco', 'Tesco'), ('iceland', 'Iceland')],
+        required = False,
+        widget = forms.Select({
+            'class': 'form_field',
+            'onchange': 'this.form.submit()',
+        })
+    )

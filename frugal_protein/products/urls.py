@@ -5,4 +5,5 @@ urlpatterns = [
     path('', views.Index.as_view(), name='index'),
     path('search/', views.SearchView.as_view(), name='search'),
     path('product/<int:pk>/', views.ProductView.as_view(), name='product'),
+    path('browse/', views.ProductBrowser.as_view(), name='product_browser')
 ]

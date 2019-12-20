@@ -1,0 +1,18 @@
+{% extends "products/html_base.html" %}
+
+{% block content %}
+    <form action="" method="GET">
+        {{ form }}
+    </form>
+
+    <ul>
+        <li>Product - kcal - fat - carb - protein</li>
+        {% for product in products %}
+            <li>
+                <a href="/product/{{ product.pid }}">{{ product.description }}</a>
+             kcal:{{ product.kcal }} F:{{ product.fat }} C:{{ product.carb }} P:{{ product.protein }} price: {{ product.x }}
+            
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock content %}

@@ -85,3 +85,30 @@ class SearchView(FormMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['querystring'] = self.request.GET
         return context
+
+class ProductBrowser(FormMixin, ListView):
+    form_class = forms.ProductBrowserForm
+    context_object_name = 'products'
+    template_name = 'products/product_browser.html'
+
+    def get_initial(self):
+        self.initial = {
+            'search': self.request.GET.get('search'),
+            'store': self.request.GET.get('store')
+        }
+        return super().get_initial()
+
+    def get_queryset(self):
+        search_query = self.request.GET.get('search')
+        store = self.request.GET.get('store')
+
+        queryset = []
+        if search_query:
+            store_filter = {f'{store}__isnull': False}
+            queryset = m.ProductInfo.objects.filter(**store_filter)
+            queryset = queryset.filter(
+                description__search=search_query).order_by('description')
+
+        for product in queryset:
+            setattr(product, 'x', product.cheapest_price(store))
+        return queryset
