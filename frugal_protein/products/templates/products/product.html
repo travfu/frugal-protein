@@ -2,6 +2,10 @@
 
 {% load products_filters %}
 
+{% block title %}
+    {{ product.description }}
+{% endblock title %}
+
 {% block img %}
     {{ block.super }}
     <img src="{{ product.img.url }}" alt="{{ product.description|title }}" class="image">
