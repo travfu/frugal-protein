@@ -1,4 +1,5 @@
 from django.test import TestCase
+from django.urls import reverse
 
 from .forms import ProductSearchForm
 from .helper.price_calc import Calc
@@ -191,3 +192,85 @@ class TestForms(TestCase):
 
         self.assertIn(('tesco', 'Tesco'), store_choices)
         self.assertIn(('iceland', 'Iceland'), store_choices)
+
+
+# class ProductBrowserFormTests(TestCase):
+
+
+class ProductBrowserTests(TestCase):
+    def generate_GET(self, **kwargs):
+        url = reverse('product_browser')
+        querystring_list = []
+        for k, v in kwargs.items():
+            arg = f"{k}={'+'.join(v.split())}"
+            querystring_list.append(arg)
+        querystring = '&'.join(querystring_list)
+        return url + '?' + querystring
+
+    def create_product(self, **kwargs):
+        product = ProductInfo(**kwargs)
+        product.save()
+        return product
+
+    def test_has_search_query(self):
+        """
+        If GET request includes search query, return appropriately filtered
+        queryset of products
+        """
+        self.create_product(description='productA', tesco='1')
+        self.create_product(description='productB', tesco='2')
+        url = self.generate_GET(search='productA', store='tesco')
+        response = self.client.get(url)
+
+        res = response.context['products']
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(res), 1)
+        self.assertEqual(res[0].description, 'productA')
+
+    def test_uses_full_text_search(self):
+        """
+        Queryset filtering should use Postgres' full text search
+        """
+        # beef + mince should match 'beef 7% mince' if using full text search
+        # but using queryset's in-built __icontains will not match 
+        # 'beef 7% mince'
+        self.create_product(description='beef 7% mince', tesco='1')
+        url = self.generate_GET(search='beef mince', store='tesco')
+        response = self.client.get(url)
+
+        res = response.context['products']
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(res), 1)
+        self.assertEqual(res[0].description, 'beef 7% mince')
+
+    def test_store_choice(self):
+        """
+        Queryset should be filtered by store
+        """
+        self.create_product(description='tesco product', tesco='1')
+        self.create_product(description='iceland product', iceland='1')
+        self.create_product(description='common product', tesco='2', 
+                            iceland='2')
+        url = self.generate_GET(search='product', store='iceland')
+        response = self.client.get(url)
+
+        res = response.context['products']
+        res_products = [r.description for r in res]
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(res), 2)
+        self.assertIn('iceland product', res_products)
+        self.assertIn('common product', res_products)
+
+    def test_cheapest_protein_price_added_to_queryset(self):
+        """
+        New attribute, storing cheapest £/10g protein value, should be added to
+        each item in queryset.
+        """
+        self.create_product(description='productA', total_qty=0.1, 
+                            unit_of_measurement='kg', tesco_base_price=1,
+                            protein='10', tesco='1')
+        url = self.generate_GET(search='productA', store='tesco')
+        response = self.client.get(url)
+
+        res = response.context['products']
+        self.assertEqual(res[0].protein_price, 1)

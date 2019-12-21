@@ -110,5 +110,6 @@ class ProductBrowser(FormMixin, ListView):
                 description__search=search_query).order_by('description')
 
         for product in queryset:
-            setattr(product, 'x', product.cheapest_price(store))
+            # Add cheapest £/10g protein value (from base, sale, or offer)
+            setattr(product, 'protein_price', product.cheapest_price(store))
         return queryset

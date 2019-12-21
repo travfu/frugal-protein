@@ -97,3 +97,21 @@ class ProductInfo(models.Model):
             col3['class'] = 'col4'
             prices[store] = [col1, col2, col3]
         return prices
+
+    def cheapest_price(self, store):
+        base_suffix = '_base_price'
+        sale_suffix = '_sale_price'
+        offer_suffix = '_offer_price'
+
+        base = getattr(self, store + base_suffix)
+        sale = getattr(self, store + sale_suffix)
+        offer = getattr(self, store + offer_suffix)
+
+        prices = [p for p in (base, sale, offer) if p is not None]
+        if prices and self.protein and self.total_qty:
+            cheapest = min(prices)
+            ppu = Calc.unit_price(cheapest, self.total_qty)
+            ppp = Calc.price_per_protein(ppu, self.protein, 100, 'g')
+            price_per_10g_protein = ppp * 10
+            return price_per_10g_protein
+        return 0
