@@ -3,6 +3,7 @@
 
 # Local files
 _local_psql_credentials.py
+TODO.md
 
 #Random
 *.exrc
