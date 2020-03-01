@@ -106,8 +106,14 @@ class ProductBrowser(FormMixin, ListView):
         if search_query:
             store_filter = {f'{store}__isnull': False}
             queryset = m.ProductInfo.objects.filter(**store_filter)
-            queryset = queryset.filter(
-                description__search=search_query).order_by('description')
+            filters = {
+                'description__search': search_query,  # query
+                'total_qty__gt': 0,                   # exclude items w/o qty
+                'kcal__gt': 0,                        # exclude items w/o nutrition
+                f'{store}_base_price__isnull': False  # exclude items w/o price
+            }
+            queryset = queryset.filter(**filters).order_by('description')
+                
 
         for product in queryset:
             # Add cheapest £/10g protein value (from base, sale, or offer)
