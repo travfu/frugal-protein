@@ -1,4 +1,5 @@
 # Frugal Protein
+http://frugal-protein.herokuapp.com/
 
 ## What is Frugal Protein
 Frugal Protein is a grocery shopping companion web app to help make frugal decisions when shopping for high-protein content products. 
